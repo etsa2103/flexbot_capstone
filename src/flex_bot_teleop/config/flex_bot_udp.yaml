@@ -1,0 +1,16 @@
+flex_bot_udp_bridge:
+  ros__parameters:
+    imx7_ip: "192.168.0.2"
+    cmd_port: 5001
+    fb_port: 5002
+    cmd_rate_hz: 50.0
+
+    # true if /left_wheel/cmd_vel is rad/s (your teleop node)
+    cmds_are_radps: true
+
+    # convenience output
+    publish_feedback_radps: true
+
+    imu_port: 5005
+    imu_frame_id: "xsens_imu"
+    imu_rpy_in_degrees: false
