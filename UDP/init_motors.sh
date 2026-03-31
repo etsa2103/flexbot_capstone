@@ -4,7 +4,7 @@ echo "=============================="
 echo " Initializing Left Motor..."
 echo "=============================="
 
-cd /home/bg_bot/MOTORS || exit 1
+cd ~/flexbot_capstone/MOTORS || exit 1
 
 ./init_left_motor
 
