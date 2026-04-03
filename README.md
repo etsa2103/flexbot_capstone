@@ -1,8 +1,6 @@
-# (add credit to kartik and link his repo)
-
 # High Level CPU Setup for Flex Bot
 
-This repo takes you step by step through the setup of High Level CPU connected to the Berkshire Grey Flexbot. This computer is recieves sensor data over ROS2 topics and runs high level operations such as teleoperation, localization, mapping, and autonomous exploration.
+This repository provides a step-by-step guide for setting up the High-Level CPU connected to the Berkshire Grey FlexBot. This system receives sensor data over ROS 2 topics and runs high-level functionality such as teleoperation, localization, mapping, and autonomous exploration.
 
 This guide will cover the following topics:
 
@@ -14,7 +12,14 @@ This guide will cover the following topics:
 - **Autonomous modes** — fill in
 - **Visualization** — fill in
 
-> **Note:** This repo has been tested and runs on a (FILL IN CPU NAME) running (FILL IN OS NAME). Though it should work on any system that can run ROS 2 (Humble or Jazzy)
+> **Note:** This repo has been tested and runs on a (FILL IN CPU NAME) running (FILL IN OS NAME). Though it should work on any system that can run ROS 2 (Humble or Jazzy). This repo also assumes it has been installed at the base of the root directory on the high level cpu.
+
+---
+
+## Attribution
+
+This codebase is adapted from work originally developed by Kartik Virmani.
+It has been modified to support the VLP-16 LiDAR and simplified for clarity and instructional use.
 
 ---
 
@@ -22,15 +27,23 @@ This guide will cover the following topics:
 
 Follow this guide to [install ROS2](https://docs.ros.org/en/humble/Installation.html)
 
-Run `sudo apt update`
+**Option 1 Use rosdep for dependancies:**
 
-Install foxglove bridge for visualization: `sudo apt install ros-$ROS_DISTRO-foxglove-bridge`
+```bash
+sudo rosdep init
+rosdep update
+cd ~/flexbot_capstone
+rosdep install --from-paths src --ignore-src -r -y
+```
 
-Install robot-localization package: `sudo apt install ros-$ROS_DISTRO-robot-localization`
+**Option 2 Manually install dependancies:**
 
-*or use rosdep install*
+1. Run `sudo apt update`
+2. Install foxglove bridge for visualization: `sudo apt install ros-$ROS_DISTRO-foxglove-bridge`
+3. Install robot-localization package: `sudo apt install ros-$ROS_DISTRO-robot-localization`
+4. Install velodyne ros package: `sudo apt install ros-$ROS_DISTRO-velodyne`
 
-With all dependancies installed you can build the workspace
+With all dependancies installed you can build the workspace using the following commands.
 
 ```bash
 cd ~/flexbot_capstone
@@ -38,47 +51,47 @@ colcon build --symlink-install
 source install/setup.bash
 ```
 
-*Add ros domain id to bashrc*
+Next add ros domain id to bashrc using the following commands.
+
+```bash
+nano ~/.bashrc
+export ROS_DOMAIN_ID=200
+```
+
+> **Note:** This is so your ros nodes do not talk to other ros instances on the network
 
 ## Network Setup
 
+First I suggest [setting a static IP](https://www.freecodecamp.org/news/setting-a-static-ip-in-ubuntu-linux-ip-address-tutorial/) on your local wifi so you can remotely access the high level computer.
+
+We used `192.168.129.200` and our username is `flexbot` so it can be accessed using `ssh flexbot@192.168.129.200`
+
 For the High Level CPU to communicate with the Low Level CPU each needs to assign an IP Address to the Ethernet interface connecting the two. On our system we used the following IPs:
 
-**High Level IP** = 192.168.0.20
+**High Level IP:** `192.168.0.20`
 
-**Low Level IP** = 192.168.0.2
+**Low Level IP:** `192.168.0.2`
 
-### Method 1
+### Setting Static IP
 
-add nmcli connection method
+1. Unplug ethernet connection, run `ip a`, reconnect ethernet, run `ip a` again, and locate name of the new ethernet connection. (Ours was *enp1s0)*
+2. Run `nmcli con show`
+3. Use `nmcli connection show ` to determine which wired connection is to the higher level cpu ethernet interface. (In our case "Wired connection 1" was connected to enp1s0)
+4. Run the following command to rename the connection and set its IP. Make sure you replace <connection_name> with the connection you found in step 3.
 
-### Method 2
+```bash
+nmcli con modify "<connection_name>" connection.id "cpu-link"
+nmcli con modify "cpu-link" 
+  connection.autoconnect yes 
+  ipv4.method manual 
+  ipv4.addresses 192.168.0.2/24 
+  ipv4.gateway ""
 
-1. Unplug ethernet connection, run `ip a`, reconnect ethernet, run `ip a` again, and locate name of the new ethernet connection. Ours was ***enp1s0.***
-2. Go to netplan folder `cd /etc/netplan/` and look for config yaml. Ours was `01-network-manager-all.yaml`
-3. Update config file to look like this making sure you use your ethernet connection name and High Level IP:
-
-```yaml
-network:
-  version: 2
-  renderer: NetworkManager
-  ethernets:
-    enp1s0:
-      dhcp4: no
-      addresses:
-        - 192.168.0.20/24
-      routes:
-        - to: default
-          via: 192.168.0.1
-      nameservers:
-        addresses:
-          - 8.8.8.8
-          - 8.8.4.4
+nmcli connection down "cpu-link"
+nmcli connection up "cpu-link"
 ```
 
-4. Run `sudo netplan apply` to apply changes
-
-> **Note:** Make sure this ethernet connection is the only interface on your computer with this IP
+> **Note:** Sometimes other network management systems can override the network settings we changed with nmcli. I suggest resetting the cpu after making changes to see if they remain on reboot. If not, look into other network presets such at netplan. Also make use ip and make sure this ethernet connection is the only interface on your computer with this IP
 
 ### Low Level CPU
 
@@ -90,148 +103,43 @@ Make sure the UDP IP/port settings in `flex_bot_teleop/config/flex_bot_udp.yaml`
 
 ## Teleoperation
 
+To be completed.
+
+---
+
 ## Localization
+
+To be completed.
+
+---
 
 ## Lidar/Mapping
 
+### Lidar Setup
+
+1. Plug VLP16 ethernet in and run `ip a` to find the ethernet interface name. (Ours was enx7cc2c642f053)
+2. Run `sudo tcpdump -i <ethernet_interface_name> udp port 2368` replacing <ethernet_interface_name> with the name you found in step 1.
+3. Look at the output to ensure you are recieving data and to determine the ip address of the lidar.
+4. Run `sudo nano /opt/ros/humble/share/velodyne_driver/config/VLP16-velodyne_driver_node-params.yaml` and change ip to match lidar ip you found in step 2.
+5. Assign ip to ethernet interface with lidar using the following command.
+
+```bash
+nmcli con add type ethernet ifname fill_ethernet_interface_name con-name lidar-net
+ipv4.addresses 192.168.0.100/24 ipv4.method manual ipv4.never-default yes
+```
+
+> **Note:** Use `ros2 launch velodyne velodyne-all-nodes-VLP16-launch.py` to test if you have set eveything up correctly
+
+---
+
 ## Autonomous modes
+
+To be completed.
+
+---
 
 ## Visualization
 
----
-
-# Kartiks stuff i have not upacked yet
-
-## Prerequisites
-
-- ROS 2 (Humble or Jazzy)
-- `robot_localization` — for EKF state estimation
-- `tf2_ros`
-- `rviz2` (optional, for visualization)
-
-Network configuration (adjust to your setup):
-
-- IMX7 IP: Always check `192.168.0.2`
-- Companion Computer IP (UDP receiver): Set your computers wired connection ip. `192.168.0.20`
+To be completed.
 
 ---
-
-## Package Overview
-
-### `flex_bot_teleop`
-
-Handles bidirectional UDP communication with the IMX7.
-
-- `udp_bridge_node` — bridges ROS 2 topics to/from UDP packets exchanged with the IMX7
-- `teleop_node` — converts joystick or keyboard input into velocity commands
-
-Configuration is in `config/flex_bot_udp.yaml` and `config/teleop.yaml`. Adjust UDP ports and IP addresses there to match your network.
-
-Launch teleop:
-
-```bash
-ros2 launch flex_bot_teleop flex_bot.launch.py
-```
-
----
-
-### `flex_bot_odometry`
-
-Computes wheel odometry from encoder feedback received over UDP from the IMX7.
-
-Publishes `odom → base_link` as an odometry source (later fused by the EKF).
-
-Configuration is in `config/wheel_odom.yaml`.
-
-Launch wheel odometry:
-
-```bash
-ros2 launch flex_bot_odometry wheel_odom.launch.py
-```
-
-To visualize the odometry path:
-
-```bash
-ros2 run flex_bot_odometry odom_to_path.py
-```
-
----
-
-### State Estimation (`flex_bot_bringup` — EKF only)
-
-The EKF (via `robot_localization`) fuses wheel odometry and IMU data to produce a smooth, stable `odom → base_link` transform.
-
-Configuration is in `flex_bot_bringup/config/ekf_imu.yaml`. Key settings:
-
-- `two_d_mode: true` — recommended for ground robots
-- Fuse yaw and yaw-rate from IMU; avoid fusing raw linear acceleration until a reliable odometry source is confirmed, as it will cause drift
-
-Launch state estimation:
-
-```bash
-ros2 launch flex_bot_bringup bringup_state_estimation.launch.py
-```
-
-Or run the EKF node directly:
-
-```bash
-ros2 run robot_localization ekf_node --ros-args --params-file \
-  ~/flex_bot/src/flex_bot_bringup/config/ekf_imu.yaml
-```
-
----
-
-## Static TF Setup
-
-The robot requires static transforms declaring sensor mounting positions relative to `base_link`. Publish these before starting any other nodes.
-
-**base_link → IMU:**
-
-```bash
-ros2 run tf2_ros static_transform_publisher \
-  0 0 0 0 0 0 base_link xsens_imu
-```
-
-> Replace the zeros with the real mounting offset once measured.
-
-Verify the full TF tree at any time:
-
-```bash
-ros2 run tf2_tools view_frames
-```
-
----
-
-## TF Chain
-
-The expected transform chain during normal operation:
-
-```
-odom → base_link        # published by robot_localization EKF
-         └→ xsens_imu  # static TF
-```
-
-> `map → odom` is not published in this minimal setup. It would require a SLAM or localization node, which is out of scope here.
-
----
-
-## Recommended Launch Order
-
-1. Static TFs
-2. Teleop (UDP bridge + command input)
-3. Wheel Odometry
-4. State Estimation (EKF)
-
-```bash
-# Terminal 1 — Static TFs
-ros2 launch flex_bot_bringup static_tfs.launch.py
-
-# Terminal 2 — Teleop + UDP bridge
-ros2 launch flex_bot_teleop flex_bot.launch.py
-
-# Terminal 3 — Wheel odometry
-ros2 launch flex_bot_odometry wheel_odom.launch.py
-
-# Terminal 4 — EKF state estimation
-ros2 launch flex_bot_bringup bringup_state_estimation.launch.py
-```
