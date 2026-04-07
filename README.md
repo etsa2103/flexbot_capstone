@@ -68,9 +68,9 @@ We used `192.168.129.200` and our username is `flexbot` so it can be accessed us
 
 For the High Level CPU to communicate with the Low Level CPU each needs to assign an IP Address to the Ethernet interface connecting the two. On our system we used the following IPs:
 
-**High Level IP:** `192.168.0.20`
+**High Level IP:** `192.168.10.20`
 
-**Low Level IP:** `192.168.0.2`
+**Low Level IP:** `192.168.10.2`
 
 ### Setting Static IP
 
@@ -84,7 +84,7 @@ nmcli con modify "<connection_name>" connection.id "cpu-link"
 nmcli con modify "cpu-link" 
   connection.autoconnect yes 
   ipv4.method manual 
-  ipv4.addresses 192.168.0.2/24 
+  ipv4.addresses 192.168.10.20/24 
   ipv4.gateway ""
 
 nmcli connection down "cpu-link"
