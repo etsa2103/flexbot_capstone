@@ -40,7 +40,7 @@ def generate_launch_description():
     # )
 
     return LaunchDescription([
-        DeclareLaunchArgument("use_rviz", default_value="true"),
+        DeclareLaunchArgument("use_rviz", default_value="false"),
         sensors,
         static_tfs,
         ekf,

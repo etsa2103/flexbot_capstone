@@ -22,9 +22,9 @@ def generate_launch_description():
     tf_lidar = Node(
         package="tf2_ros",
         executable="static_transform_publisher",
-        name="static_tf_laser_1",
+        name="static_tf_velodyne",
         output="screen",
-        arguments=["0", "0", "0", "0", "0", "0", "base_link", "laser_1"],
+        arguments=["0", "0", "0", "0", "0", "0", "base_link", "velodyne"],
     )
 
     return LaunchDescription([tf_lidar])

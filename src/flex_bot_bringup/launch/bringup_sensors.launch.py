@@ -18,6 +18,9 @@ def generate_launch_description():
         PythonExpression(["'host_FREchoFilter:=' + '", host_FREchoFilter, "'"]),
         PythonExpression(["'tf_publish_rate:=' + '", tf_publish_rate, "'"]),
     ]
+    velodyne_cmd = [
+        "ros2", "launch", "velodyne", "velodyne-all-nodes-VLP16-launch.py"
+    ]
 
     return LaunchDescription([
         DeclareLaunchArgument("hostname", default_value="192.168.0.1"),
@@ -26,5 +29,6 @@ def generate_launch_description():
         DeclareLaunchArgument("host_FREchoFilter", default_value="0"),
         DeclareLaunchArgument("tf_publish_rate", default_value="0"),
 
-        ExecuteProcess(cmd=sick_cmd, output="screen"),
+        #ExecuteProcess(cmd=sick_cmd, output="screen"),
+        ExecuteProcess(cmd=velodyne_cmd, output="screen"),
     ])
