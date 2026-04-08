@@ -4,13 +4,14 @@ This repository provides a step-by-step guide for setting up the High-Level CPU 
 
 This guide will cover the following topics:
 
-- **ROS Setup** — fill in
-- **Network Setup** — fill in
-- **Teleoperation** — sending UDP commands to the IMX7 and receiving state feedback
-- **Localization** — fill in
-- **Lidar/Mapping** — fill in
-- **Autonomous modes** — fill in
-- **Visualization** — fill in
+- **ROS Setup** — Installing ROS2 and package dependencies for this repo
+- **Network Setup** — Setting up the ethernet connection between the high and low level CPU
+- **Teleoperation** — Modifying config files and running the teleop node
+- **Localization** — fill in (odom pkg)
+- **Lidar/Mapping** — Setting up the lidar and running slam toolbox
+- **Autonomous modes** — Running autonomy node to have the flexbot explore and map the environment
+- **Bringup** — How to launch all necesary ros nodes for flexbot operation
+- **Visualization** — Setting up foxglove layout and running foxglove bridge
 
 > **Note:** This repo has been tested and runs on a (FILL IN CPU NAME) running (FILL IN OS NAME). Though it should work on any system that can run ROS 2 (Humble or Jazzy). This repo also assumes it has been installed at the base of the root directory on the high level cpu.
 
@@ -59,6 +60,12 @@ export ROS_DOMAIN_ID=200
 ```
 
 > **Note:** This is so your ros nodes do not talk to other ros instances on the network
+
+
+
+---
+
+
 
 ## Network Setup
 
@@ -128,11 +135,23 @@ nmcli con add type ethernet ifname fill_ethernet_interface_name con-name lidar-n
 ipv4.addresses 192.168.0.100/24 ipv4.method manual ipv4.never-default yes
 ```
 
-> **Note:** Use `ros2 launch velodyne velodyne-all-nodes-VLP16-launch.py` to test if you have set eveything up correctly
+> **Note:** Use `ros2 launch velodyne velodyne-all-nodes-VLP16-launch.py` to test if you have set eveything up correctly. A scan topic should appear if you run `ros2 topic list`
+
+### Running slam toolbox
+
+modify flex_bot_bringup/config/slam_config
+
+ros2 launch flex_bot_bringup slam_async.launch.py
 
 ---
 
 ## Autonomous modes
+
+To be completed.
+
+---
+
+## Bringup
 
 To be completed.
 
