@@ -107,7 +107,23 @@ Make sure the UDP IP/port settings in `flex_bot_teleop/config/flex_bot_udp.yaml`
 
 ## Teleoperation
 
-To be completed.
+IN TERMINAL 1:
+1. `cd flexbot_capstone`
+2. `source /opt/ros/{ROS_DISTRO}/setup.bash`
+3. `run colcon build`
+4. `source install/setup.bash`
+5. `ros2 launch flex_bot_teleop flex_bot.launch.py`
+
+IN TERMINAL 2:
+1. `cd flexbot_capstone`
+2. `source /opt/ros/{ROS_DISTRO}/setup.bash`
+3. `ros2 run teleop_twist_keyboard teleop_twist_keyboard`
+
+if it says you do not have the teleop-twist-keyboard available:
+1. `sudo apt update`
+2. `sudo apt install ros-{ROS_DISTRO}-teleop-twist-keyboard`
+
+we have a limit on the speed to be 10 in the config file as the teleop-twist-keyboard goes up to max speed almost immediately.
 
 ---
 
