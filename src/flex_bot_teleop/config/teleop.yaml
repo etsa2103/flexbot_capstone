@@ -2,8 +2,8 @@ teleop_node:
   ros__parameters:
     joy_topic: "/joy"
 
-    axis_ly: 3
-    axis_rx: 1
+    axis_ly: 1
+    axis_rx: 3
 
     axis_lt: -1
     axis_rt: -1

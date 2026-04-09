@@ -1,6 +1,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/float64.hpp>
 #include <sensor_msgs/msg/joy.hpp>
+#include <geometry_msgs/msg/twist.hpp>
 
 #include <atomic>
 #include <cmath>
@@ -16,6 +17,7 @@ public:
   {
     // ----- Parameters -----
     joy_topic_        = this->declare_parameter<std::string>("joy_topic", "/joy");
+    kbd_topic_        = this->declare_parameter<std::string>("kbd_topic", "/cmd_vel");
 
     axis_ly_          = this->declare_parameter<int>("axis_ly", 1);   // Left stick Y
     axis_rx_          = this->declare_parameter<int>("axis_rx", 3);   // Right stick X
@@ -57,7 +59,18 @@ public:
         std::lock_guard<std::mutex> lk(mtx_);
         axes_ = msg->axes;
         buttons_ = msg->buttons;
-        last_msg_time_ = this->now();
+        last_joy_time_ = this->now();
+      });
+
+    // ----- Keyboard subscriber -----
+    kbd_sub_ = this->create_subscription<geometry_msgs::msg::Twist>(
+      kbd_topic_, rclcpp::QoS(10),
+      [this](const geometry_msgs::msg::Twist::SharedPtr msg) {
+        std::lock_guard<std::mutex> lk(kbd_mtx_);
+        kbd_ly_ = msg->linear.x;    // Map to forward/back
+        kbd_rx_ = msg->angular.z;   // Map to turn
+        kbd_turret_ = msg->linear.z; // Map to turret (teleop_twist_keyboard 't' and 'b' keys)
+        last_kbd_time_ = this->now();
       });
 
     // ----- Timer to publish at fixed rate -----
@@ -66,8 +79,8 @@ public:
       std::bind(&Teleoperation::on_timer, this));
 
     RCLCPP_INFO(this->get_logger(),
-      "teleop_node ready (joy_topic=%s, max_rpm=%.1f -> max_rad_s=%.3f)",
-      joy_topic_.c_str(), max_rpm_cmd_, max_rad_s_);
+      "teleop_node ready (joy_topic=%s, kbd_topic=%s, max_rpm=%.1f -> max_rad_s=%.3f)",
+      joy_topic_.c_str(), kbd_topic_.c_str(), max_rpm_cmd_, max_rad_s_);
   }
 
 private:
@@ -81,53 +94,83 @@ private:
   }
 
   void on_timer() {
-    // Copy latest inputs under lock
+    const auto now = this->now();
+
+    // 1. Copy latest Keyboard inputs under lock
+    float k_ly = 0.f, k_rx = 0.f, k_turret = 0.f;
+    rclcpp::Time last_kbd;
+    {
+      std::lock_guard<std::mutex> lk(kbd_mtx_);
+      k_ly = kbd_ly_;
+      k_rx = kbd_rx_;
+      k_turret = kbd_turret_;
+      last_kbd = last_kbd_time_;
+    }
+
+    // 2. Copy latest Joy inputs under lock
     std::vector<float> axes;
     std::vector<int32_t> btns;
-    rclcpp::Time last;
+    rclcpp::Time last_joy;
     {
       std::lock_guard<std::mutex> lk(mtx_);
       axes = axes_;
       btns = buttons_;
-      last = last_msg_time_;
+      last_joy = last_joy_time_;
     }
 
-    // Stale/Deadman gating
-    bool ok = false;
-    const auto now = this->now();
-    if ((now - last).seconds() < stale_timeout_s_) {
-      if (deadman_button_ < 0 ||
-          (deadman_button_ < (int)btns.size() && btns[deadman_button_])) {
-        ok = true;
+    // Output variables
+    float final_ly = 0.f;
+    float final_rx = 0.f;
+    float final_turret = 0.f;
+
+    // Determine if Keyboard is active (has priority)
+    bool kbd_active = false;
+    if ((now - last_kbd).seconds() < stale_timeout_s_) {
+      // If the keyboard is sending any non-zero command, it takes over
+      if (std::abs(k_ly) > 0.001f || std::abs(k_rx) > 0.001f || std::abs(k_turret) > 0.001f) {
+        kbd_active = true;
+        final_ly = k_ly;
+        final_rx = k_rx;
+        final_turret = k_turret;
       }
     }
 
-    float ly = 0.f, rx = 0.f;
+    // If Keyboard is NOT active, fallback to Joystick
+    if (!kbd_active) {
+      bool joy_ok = false;
+      if ((now - last_joy).seconds() < stale_timeout_s_) {
+        // Deadman switch logic for joystick
+        if (deadman_button_ < 0 ||
+            (deadman_button_ < (int)btns.size() && btns[deadman_button_])) {
+          joy_ok = true;
+        }
+      }
 
-    // Triggers can be axes OR buttons; we support both.
-    float lt = 0.f, rt = 0.f;
+      if (joy_ok) {
+        float j_lt = 0.f, j_rt = 0.f;
 
-    if (ok) {
-      if (axis_ly_ >= 0 && axis_ly_ < (int)axes.size()) ly = shape(axes[axis_ly_], invert_ly_);
-      if (axis_rx_ >= 0 && axis_rx_ < (int)axes.size()) rx = shape(axes[axis_rx_], invert_rx_);
+        if (axis_ly_ >= 0 && axis_ly_ < (int)axes.size()) final_ly = shape(axes[axis_ly_], invert_ly_);
+        if (axis_rx_ >= 0 && axis_rx_ < (int)axes.size()) final_rx = shape(axes[axis_rx_], invert_rx_);
 
-      if (axis_lt_ >= 0 && axis_lt_ < (int)axes.size()) lt = shape(axes[axis_lt_], invert_lt_);
-      if (axis_rt_ >= 0 && axis_rt_ < (int)axes.size()) rt = shape(axes[axis_rt_], invert_rt_);
+        if (axis_lt_ >= 0 && axis_lt_ < (int)axes.size()) j_lt = shape(axes[axis_lt_], invert_lt_);
+        if (axis_rt_ >= 0 && axis_rt_ < (int)axes.size()) j_rt = shape(axes[axis_rt_], invert_rt_);
 
-      // If triggers are buttons, map to 0/1
-      if (btn_lt_ >= 0 && btn_lt_ < (int)btns.size() && btns[btn_lt_]) lt = 1.0f;
-      if (btn_rt_ >= 0 && btn_rt_ < (int)btns.size() && btns[btn_rt_]) rt = 1.0f;
+        if (btn_lt_ >= 0 && btn_lt_ < (int)btns.size() && btns[btn_lt_]) j_lt = 1.0f;
+        if (btn_rt_ >= 0 && btn_rt_ < (int)btns.size() && btns[btn_rt_]) j_rt = 1.0f;
+
+        final_turret = j_rt - j_lt;
+      }
     }
 
-    // Mix
-    const float forward = ly * (float)mix_scale_;
-    const float turn    = rx * (float)mix_scale_;
+    // Mix (Applying either the Kbd or Joy values)
+    const float forward = final_ly * (float)mix_scale_;
+    const float turn    = final_rx * (float)mix_scale_;
 
     const double left_cmd  = (forward + turn) * max_rad_s_;
     const double right_cmd = (forward - turn) * max_rad_s_;
-
-    // Turret: RT - LT
-    const double turret_cmd = (double)(rt - lt) * turret_max_rad_s_;
+    
+    // Turret
+    const double turret_cmd = (double)(final_turret) * turret_max_rad_s_;
 
     // EMA smoothing
     const double dt = 1.0 / std::max(1.0, publish_rate_hz_);
@@ -147,6 +190,7 @@ private:
 private:
   // Params
   std::string joy_topic_;
+  std::string kbd_topic_;
   int axis_ly_, axis_rx_;
   int axis_lt_, axis_rt_;
   int btn_lt_, btn_rt_;
@@ -159,7 +203,12 @@ private:
   std::mutex mtx_;
   std::vector<float> axes_;
   std::vector<int32_t> buttons_;
-  rclcpp::Time last_msg_time_{0, 0, RCL_ROS_TIME};
+  rclcpp::Time last_joy_time_{0, 0, RCL_ROS_TIME};
+
+  // Latest Keyboard state
+  std::mutex kbd_mtx_;
+  float kbd_ly_{0.0f}, kbd_rx_{0.0f}, kbd_turret_{0.0f};
+  rclcpp::Time last_kbd_time_{0, 0, RCL_ROS_TIME};
 
   // Smoothed outputs
   double left_f_{0.0}, right_f_{0.0}, turret_f_{0.0};
@@ -167,6 +216,7 @@ private:
   // ROS
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_;
+  rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr kbd_sub_;
   rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr pub_left_, pub_right_, pub_turret_;
 };
 
