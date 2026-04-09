@@ -13,7 +13,7 @@ This guide will cover the following topics:
 - **Bringup** — How to launch all necesary ros nodes for flexbot operation
 - **Visualization** — Setting up foxglove layout and running foxglove bridge
 
-> **Note:** This repo has been tested and runs on a (FILL IN CPU NAME) running (FILL IN OS NAME). Though it should work on any system that can run ROS 2 (Humble or Jazzy). This repo also assumes it has been installed at the base of the root directory on the high level cpu.
+> **Note:** This repo has been tested and runs on a **Sapphire BP-FP6-SN** running **Ubuntu 22.04.5 LTS**. Though it should work on any system that can run ROS 2 (Humble or Jazzy). This repo also assumes it has been installed at the base of the root directory on the high level cpu.
 
 ---
 
@@ -43,6 +43,7 @@ rosdep install --from-paths src --ignore-src -r -y
 2. Install foxglove bridge for visualization: `sudo apt install ros-$ROS_DISTRO-foxglove-bridge`
 3. Install robot-localization package: `sudo apt install ros-$ROS_DISTRO-robot-localization`
 4. Install velodyne ros package: `sudo apt install ros-$ROS_DISTRO-velodyne`
+5. install keyboard teleop package: `sudo apt install ros-$ROS_DISTRO-teleop-keyboard`
 
 With all dependancies installed you can build the workspace using the following commands.
 
@@ -61,11 +62,7 @@ export ROS_DOMAIN_ID=200
 
 > **Note:** This is so your ros nodes do not talk to other ros instances on the network
 
-
-
 ---
-
-
 
 ## Network Setup
 
@@ -132,7 +129,7 @@ To be completed.
 
 ```bash
 nmcli con add type ethernet ifname fill_ethernet_interface_name con-name lidar-net
-ipv4.addresses 192.168.0.100/24 ipv4.method manual ipv4.never-default yes
+ipv4.addresses 192.168.2.201/24 ipv4.method manual ipv4.never-default yes
 ```
 
 > **Note:** Use `ros2 launch velodyne velodyne-all-nodes-VLP16-launch.py` to test if you have set eveything up correctly. A scan topic should appear if you run `ros2 topic list`
