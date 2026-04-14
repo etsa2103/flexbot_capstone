@@ -6,7 +6,7 @@ This guide will cover the following topics:
 
 - **Flashing Custom Operating System** — This section covers the steps of flashing our custom Linux Operating System on a micro sd card and installing it on the Flexbots low level computer.
 - **Network Setup** — Setting IPs so the low and high level CPUs can communicate.
-- **Setting up system services** — Creating system services that auto launch scripts for arming motors and setting up communication between the low and high level CPUs. (This section might be redundent if custom OS is flashed)
+- **Setting up system services** — Creating system services that auto launch scripts for arming motors and setting up communication between the low and high level CPUs.
 - **File system** — Summary of each file and its specific use in the flexbot system
 
 > **Note:** This repo assumes it has been installed at the base of the root directory on the low level cpu.
@@ -54,40 +54,52 @@ Once you have access to a working microSD card or image, follow the appropriate 
 
 ## Network Setup
 
-The custom OS should be setup to auto connect to wifi with SSID `bg-flexbot-wifi6` and password `rac@bg1922` which you can mimic with your own wifi hotspot. I suggest [setting a static IP](https://www.freecodecamp.org/news/setting-a-static-ip-in-ubuntu-linux-ip-address-tutorial/) on this wifi network so you can remotely access the low level computer for debugging. We used `192.168.129.200` and our username is `flexbot` so it can be accessed using `ssh flexbot@192.168.129.200`
+The custom OS should be setup to auto connect to wifi with SSID `bg-flexbot-wifi6` and password `rac@bg1922` which you can mimic with your own wifi hotspot. I suggest [setting a static IP](https://www.freecodecamp.org/news/setting-a-static-ip-in-ubuntu-linux-ip-address-tutorial/) on this wifi network so you can remotely access the low level computer for debugging.
 
-For the High Level CPU to communicate with the Low Level CPU each needs to assign an IP Address to the Ethernet interface connecting the two. On our system we used the following IPs:
+For the High Level CPU to communicate with the Low Level CPU and the lidar, each needs to assign an IP Address to the Ethernet interface connecting them. You can chose your own IPs as long as you are consistant when setting up the high level CPU. On our system we used the following IPs:
 
 **High Level IP:** `192.168.10.20`
 
 **Low Level IP:** `192.168.10.2`
 
+**Lidar IP:** `192.168.2.201`
+
+> **Note:** You can find the lidar IP by doing the following:
+>
+> 1. Plug VLP16 ethernet in and run `ip a` to find the ethernet interface name. (Ours was eth0)
+> 2. Run `sudo tcpdump -i <ethernet_interface_name> udp port 2368` replacing <ethernet_interface_name> with the name you found in step 1. ( you might need to run `sudo apt install tcpdump -y` to install tcpdump)
+> 3. Look at the output to ensure you are recieving data and to determine the ip address of the lidar.
+
 #### Setting Static IP
 
-1. Unplug ethernet connection, run `ip a`, reconnect ethernet, run `ip a` again, and locate name of the new ethernet connection. (Ours was *enp1s0)*
-2. Run `nmcli con show`
-3. Use `nmcli connection show ` to determine which wired connection is to the higher level cpu ethernet interface. (In our case "Wired connection 1" was connected to enp1s0)
-4. Run the following command to rename the connection and set its IP. Make sure you replace <connection_name> with the connection you found in step 3.
+1. Run `nmcli con show` to view all network connections and use `nmcli connection delete <connection_name>` to delete any connections you don't care about (Usually all but the wifi connection)
+2. Find the name of the ethernet interface to the lidar and to the high level cpu. You can do this by unplugging the device, running `ip a`, reconnecting the device, and running `ip a` again. (For us the lidar was *`eth0`* and the high level cpu was *`eth1`*)
+3. Run the following command to bridge both ethernet connections and assign thier IPs. Make sure you replace <low_level_cpu_ip>, <lidar_ip>,<lidar_connection_name>, <cpu_connection_name>,  and <high_level_cpu_ip>
 
 ```bash
-nmcli con modify "<connection_name>" connection.id "cpu-link"
-nmcli con modify "cpu-link" \
-  connection.autoconnect yes \
-  ipv4.method manual \
-  ipv4.addresses 192.168.10.2/24 \
-  ipv4.gateway "192.168.10.20" \
+# 1. Recreate the bridge with both IP addresses
+nmcli con add type bridge ifname br0 con-name br0 \
+    connection.autoconnect yes \
+    ipv4.method manual \
+    ipv4.gateway 192.168.10.20 \
+    ipv4.dns "8.8.8.8,1.1.1.1" \
+    ipv4.addresses "192.168.10.2/24, 192.168.2.201/24"
 
-nmcli connection down "cpu-link"
-nmcli connection up "cpu-link"
+# 2. Add the physical ports to the bridge
+nmcli con add type ethernet ifname eth0 con-name br-port-lidar master br0
+nmcli con add type ethernet ifname eth1 con-name br-port-cpu master br0
+
+# 3. Bring the bridge up
+nmcli con up br0
 ```
 
-> **Note:** Sometimes other network management systems can override the network settings we changed with nmcli. I suggest resetting the cpu after making changes to see if they remain on reboot. If not, look into other network presets such at netplan. Also run `ip a` and make sure this ethernet connection is the only interface on your computer with this IP
+> **Note:** Sometimes other network management systems can override the network settings we changed with nmcli. I suggest resetting the cpu after making changes to see if they remain on reboot. If not, look into other network presets such at netplan. Also run `ip a` and make sure each the same IP is not used for multiple interfaces.
 
 #### High Level CPU
 
-High level control is handled by an Sapphire BP-FP6-SN mounted on the flexbot and connected to the low level CPU via ethernet. See the `main` branch of this repository for that code and documentation.
+High level control is handled by an Sapphire BP-FP6-SN mounted on the flexbot and connected to the low level CPU via ethernet. See the `master` branch of this repository for that code and documentation.
 
-In order for the two CPUs to communicate you must make sure they know each other's IP address. Make sure the UDP IP/port settings in `UDP/imu_udp_tx.cpp` , `UDP/motor_controller.cpp` and `UDP/udp_cmd_client` match what is configured on the high level cpu.
+In order for the two CPUs to communicate, you must make sure they know each other's IP address. Make sure the UDP IP/port settings in `UDP/imu_udp_tx.cpp` , `UDP/motor_controller.cpp` and `UDP/udp_cmd_client` match what is configured on the high level cpu.
 
 ---
 
@@ -95,8 +107,8 @@ In order for the two CPUs to communicate you must make sure they know each other
 
 If you flashed the right OS you should already have a system service that runs the `init_bot.sh` script. This script unlocks the motors and sets up communication between the high and low level computer. To confirm it is there, run `sudo ls /etc/systemd/system/` and look for `init_bot.service`. If you don't see it, you need to create this system service yourself following the steps below.
 
-1. Run sudo chmod +x ~/flexbot_capstone/init_bot.sh
-2. sudo nano /etc/systemd/system/init_bot.service
+1. Run `sudo chmod +x ~/flexbot_capstone/init_bot.sh`
+2. Run `sudo nano /etc/systemd/system/init_bot.service`
 3. Copy the following text into the file
 
 ```yml
