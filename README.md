@@ -43,7 +43,7 @@ rosdep install --from-paths src --ignore-src -r -y
 2. Install foxglove bridge for visualization: `sudo apt install ros-$ROS_DISTRO-foxglove-bridge`
 3. Install robot-localization package: `sudo apt install ros-$ROS_DISTRO-robot-localization`
 4. Install velodyne ros package: `sudo apt install ros-$ROS_DISTRO-velodyne`
-5. install keyboard teleop package: `sudo apt install ros-$ROS_DISTRO-teleop-keyboard`
+5. install keyboard teleop package: `sudo apt install ros-$ROS_DISTRO-teleop-twist-keyboard`
 
 With all dependancies installed you can build the workspace using the following commands.
 
@@ -66,7 +66,7 @@ export ROS_DOMAIN_ID=200
 
 ## Network Setup
 
-First I suggest [setting a static IP](https://www.freecodecamp.org/news/setting-a-static-ip-in-ubuntu-linux-ip-address-tutorial/) on your local wifi so you can remotely access the high level computer. We used `192.168.129.200` and our username is `flexbot` so it can be accessed using `ssh flexbot@192.168.129.200` 
+First I suggest [setting a static IP](https://www.freecodecamp.org/news/setting-a-static-ip-in-ubuntu-linux-ip-address-tutorial/) on your local wifi so you can remotely access the high level computer. We used `192.168.129.200` and our username is `flexbot` so it can be accessed using `ssh flexbot@192.168.129.200`
 
 For the High Level CPU to communicate with the Low Level CPU each needs to assign an IP Address to the Ethernet interface connecting the two. On our system we used the following IPs:
 
@@ -103,6 +103,7 @@ Make sure the UDP IP/port settings in `flex_bot_teleop/config/flex_bot_udp.yaml`
 ## Teleoperation
 
 IN TERMINAL 1:
+
 1. `cd flexbot_capstone`
 2. `source /opt/ros/{ROS_DISTRO}/setup.bash`
 3. `run colcon build`
@@ -110,11 +111,13 @@ IN TERMINAL 1:
 5. `ros2 launch flex_bot_teleop flex_bot.launch.py`
 
 IN TERMINAL 2:
+
 1. `cd flexbot_capstone`
 2. `source /opt/ros/{ROS_DISTRO}/setup.bash`
 3. `ros2 run teleop_twist_keyboard teleop_twist_keyboard`
 
 if it says you do not have the teleop-twist-keyboard available:
+
 1. `sudo apt update`
 2. `sudo apt install ros-{ROS_DISTRO}-teleop-twist-keyboard`
 

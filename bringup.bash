@@ -40,11 +40,11 @@ for pane in 0 1 2 3; do
 done
 
 ### ====== ROS COMMANDS ====== ###
-tmux send-keys -t $SESSION_NAME:0.0 "ros2 launch " C-m
+tmux send-keys -t $SESSION_NAME:0.0 "ros2 launch flex_bot_bringup bringup_full.launch.py" C-m
 sleep 5
-tmux send-keys -t $SESSION_NAME:0.1 "ros2 launch " C-m
+tmux send-keys -t $SESSION_NAME:0.1 "ros2 launch flex_bot_teleop flex_bot.launch.py" C-m
 sleep 5
-tmux send-keys -t $SESSION_NAME:0.2 "ros2 launch " C-m
+tmux send-keys -t $SESSION_NAME:0.2 "ros2 launch teleop_twist_keyboard teleop_twist_keyboard" C-m
 sleep 5
 tmux send-keys -t $SESSION_NAME:0.3 "ros2 launch " C-m
 

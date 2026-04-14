@@ -11,7 +11,7 @@ def generate_launch_description():
     #     arguments=["0", "0", "0", "0", "0", "0", "base_link", "xsens_imu"],
     # )
 
-    # tf_imu = Node(
+    # tf_tof = Node(
     #     package="tf2_ros",
     #     executable="static_transform_publisher",
     #     name="static_tf_sick_imu",
