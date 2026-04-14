@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-cd /home/bg_bot/UDP
+cd ~/flexbot_capstone/UDP
 
 # Start motor controller
 ./motor_controller > motor_controller.log 2>&1 &

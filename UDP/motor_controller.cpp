@@ -37,7 +37,7 @@
 static constexpr const char*  CAN_INTERFACE       = "can0";
 static constexpr double       CMD_PER_WHEEL_RPM   = 4145.0; // Tune as needed for your specific motors and gearing to achieve desired RPM range
 static constexpr uint16_t     UDP_LISTEN_PORT     = 5001;
-static constexpr const char*  UDP_SEND_IP         = "192.168.0.20";  // Jetson IP
+static constexpr const char*  UDP_SEND_IP         = "192.168.2.20";  // Jetson IP
 static constexpr uint16_t     UDP_SEND_PORT       = 5002;
 static constexpr int          CONTROL_RATE_HZ     = 50;   // 50Hz motor control
 static constexpr int          ENCODER_RATE_HZ     = 20;   // 20Hz encoder feedback
