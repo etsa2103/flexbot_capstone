@@ -5,7 +5,7 @@ This repository provides a step-by-step guide for setting up the High-Level CPU 
 This guide will cover the following topics:
 
 - **ROS Setup** — Installing ROS2 and package dependencies for this repo
-- **Network Setup** — Setting up the ethernet connection between the high and low level CPU
+- **Network Setup** — Setting up the ethernet connection between the high and low level CPUs
 - **Teleoperation** — Modifying config files and running the teleop node
 - **Localization** — fill in (odom pkg)
 - **Lidar/Mapping** — Setting up the lidar and running slam toolbox
@@ -66,9 +66,7 @@ export ROS_DOMAIN_ID=200
 
 ## Network Setup
 
-First I suggest [setting a static IP](https://www.freecodecamp.org/news/setting-a-static-ip-in-ubuntu-linux-ip-address-tutorial/) on your local wifi so you can remotely access the high level computer.
-
-We used `192.168.129.200` and our username is `flexbot` so it can be accessed using `ssh flexbot@192.168.129.200`
+First I suggest [setting a static IP](https://www.freecodecamp.org/news/setting-a-static-ip-in-ubuntu-linux-ip-address-tutorial/) on your local wifi so you can remotely access the high level computer. We used `192.168.129.200` and our username is `flexbot` so it can be accessed using `ssh flexbot@192.168.129.200` 
 
 For the High Level CPU to communicate with the Low Level CPU each needs to assign an IP Address to the Ethernet interface connecting the two. On our system we used the following IPs:
 
@@ -78,24 +76,21 @@ For the High Level CPU to communicate with the Low Level CPU each needs to assig
 
 ### Setting Static IP
 
-1. Unplug ethernet connection, run `ip a`, reconnect ethernet, run `ip a` again, and locate name of the new ethernet connection. (Ours was *enp1s0)*
-2. Run `nmcli con show`
-3. Use `nmcli connection show ` to determine which wired connection is to the higher level cpu ethernet interface. (In our case "Wired connection 1" was connected to enp1s0)
-4. Run the following command to rename the connection and set its IP. Make sure you replace <connection_name> with the connection you found in step 3.
+1. Run `nmcli con show` to view all network connections and use `nmcli connection delete <connection_name>` to delete any connections you don't care about (Usually all but the wifi connection)
+2. Find the name of the ethernet interface to the low level cpu. You can do this by unplugging the device, running `ip a`, reconnecting the device, and running `ip a` again. (For us the low level cpu was *`enp1s0`*)
+3. Run the following command to create a connection between the cpus and to set its IP. Make sure you replace `<interface_name>` with the interface name you found in step 2 and replace `<high_level_ip>` with your chosen IP.
 
 ```bash
-nmcli con modify "<connection_name>" connection.id "cpu-link"
-nmcli con modify "cpu-link" 
-  connection.autoconnect yes 
-  ipv4.method manual 
-  ipv4.addresses 192.168.10.20/24 
-  ipv4.gateway ""
+# Create connection
+nmcli con add type ethernet ifname <interface_name> con-name cpu-link \
+    ipv4.method manual \
+    ipv4.addresses <high_level_ip>/24
 
-nmcli connection down "cpu-link"
-nmcli connection up "cpu-link"
+# Refresh the connection
+nmcli con up cpu-link
 ```
 
-> **Note:** Sometimes other network management systems can override the network settings we changed with nmcli. I suggest resetting the cpu after making changes to see if they remain on reboot. If not, look into other network presets such at netplan. Also make use ip and make sure this ethernet connection is the only interface on your computer with this IP
+> **Note:** Sometimes other network management systems can override the network settings we changed with nmcli. I suggest resetting the cpu after making changes to see if they remain on reboot. If not, look into other network presets such at netplan. Also run `ip a` and make sure this ethernet connection is the only interface on your computer with this IP.
 
 ### Low Level CPU
 
@@ -121,16 +116,9 @@ To be completed.
 
 ### Lidar Setup
 
-1. Plug VLP16 ethernet in and run `ip a` to find the ethernet interface name. (Ours was enx7cc2c642f053)
-2. Run `sudo tcpdump -i <ethernet_interface_name> udp port 2368` replacing <ethernet_interface_name> with the name you found in step 1.
-3. Look at the output to ensure you are recieving data and to determine the ip address of the lidar.
-4. Run `sudo nano /opt/ros/humble/share/velodyne_driver/config/VLP16-velodyne_driver_node-params.yaml` and change ip to match lidar ip you found in step 2.
-5. Assign ip to ethernet interface with lidar using the following command.
-
-```bash
-nmcli con add type ethernet ifname fill_ethernet_interface_name con-name lidar-net
-ipv4.addresses 192.168.2.201/24 ipv4.method manual ipv4.never-default yes
-```
+1. If you followed the steps in "Network Setup" on the low level cpu branch you should have the IP address of the Lidar. (Ours was 192.168.2.201)
+2. Run `sudo nano /opt/ros/humble/share/velodyne_driver/config/VLP16-velodyne_driver_node-params.yaml` and change ip to match the lidar ip
+3. Assign ip to ethernet interface with lidar using the following command.
 
 > **Note:** Use `ros2 launch velodyne velodyne-all-nodes-VLP16-launch.py` to test if you have set eveything up correctly. A scan topic should appear if you run `ros2 topic list`
 
