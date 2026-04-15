@@ -137,15 +137,12 @@ To be completed.
 
 1. If you followed the steps in "Network Setup" on the low level cpu branch you should have the IP address of the Lidar. (Ours was 192.168.2.201)
 2. Run `sudo nano /opt/ros/humble/share/velodyne_driver/config/VLP16-velodyne_driver_node-params.yaml` and change ip to match the lidar ip
-3. Assign ip to ethernet interface with lidar using the following command.
-
-> **Note:** Use `ros2 launch velodyne velodyne-all-nodes-VLP16-launch.py` to test if you have set eveything up correctly. A scan topic should appear if you run `ros2 topic list`
+3. Use `ros2 launch velodyne velodyne-all-nodes-VLP16-launch.py` to test if you have set eveything up correctly. A scan topic should appear if you run `ros2 topic list`
 
 ### Running slam toolbox
 
-modify flex_bot_bringup/config/slam_config
-
-ros2 launch flex_bot_bringup slam_async.launch.py
+1. modify flex_bot_bringup/config/slam_config
+2. run `ros2 launch flex_bot_bringup slam_async.launch.py`
 
 ---
 
