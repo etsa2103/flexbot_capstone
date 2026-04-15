@@ -37,7 +37,7 @@
 static constexpr const char*  CAN_INTERFACE       = "can0";
 static constexpr double       CMD_PER_WHEEL_RPM   = 4145.0; // Tune as needed for your specific motors and gearing to achieve desired RPM range
 static constexpr uint16_t     UDP_LISTEN_PORT     = 5001;
-static constexpr const char*  UDP_SEND_IP         = "192.168.2.20";  // Jetson IP
+static constexpr const char*  UDP_SEND_IP         = "192.168.10.20";  // High level IP
 static constexpr uint16_t     UDP_SEND_PORT       = 5002;
 static constexpr int          CONTROL_RATE_HZ     = 50;   // 50Hz motor control
 static constexpr int          ENCODER_RATE_HZ     = 20;   // 20Hz encoder feedback
@@ -47,20 +47,17 @@ static constexpr double       MAX_RPM_FEEDBACK    = 5000000.0;   // clamp for sa
 
 
 // ─── CAN IDs ─────────────────────────────────────────────────────────────────
-
 static constexpr uint32_t RPDO_BASE   = 0x500;  // RPDO: 0x501 (node1), 0x502 (node2)
 static constexpr uint32_t SDO_REQ     = 0x600;  // SDO request: 0x601, 0x602
 static constexpr uint32_t SDO_RESP    = 0x580;  // SDO response: 0x581, 0x582
 static constexpr uint32_t SYNC_ID     = 0x080;  // SYNC broadcast
 
 // ─── CANopen Object Indices ──────────────────────────────────────────────────
-
 static constexpr uint16_t OBJ_CONTROLWORD      = 0x6040;
 static constexpr uint16_t OBJ_POSITION_ACTUAL  = 0x6064;
 static constexpr uint16_t OBJ_VELOCITY_ACTUAL  = 0x606C;
 
 // ─── Global State ────────────────────────────────────────────────────────────
-
 static std::atomic<bool> g_running{true};  // Set to false on shutdown
 
 struct MotorCommand {
@@ -72,7 +69,6 @@ static MotorCommand g_cmd;
 static std::mutex   g_cmd_mutex;
 
 // ─── Utility: Sleep for exact duration ───────────────────────────────────────
-
 static void sleep_until(std::chrono::steady_clock::time_point target) {
     auto now = std::chrono::steady_clock::now();
     if (target > now)
@@ -86,7 +82,6 @@ static double get_timestamp() {
 }
 
 // ─── CAN Socket ──────────────────────────────────────────────────────────────
-
 class CANSocket {
 public:
     CANSocket() : fd_(-1) {}
@@ -149,7 +144,6 @@ private:
 static CANSocket g_can;
 
 // ─── CAN Motor Functions ─────────────────────────────────────────────────────
-
 /**
  * Send RPDO command to a specific motor node.
  * Payload: [controlword (u16)][velocity (i32)][unused (u16)]
@@ -262,7 +256,6 @@ static bool read_encoder(uint8_t node, int32_t& out_counts) {
 
 
 // ─── Emergency Stop ──────────────────────────────────────────────────────────
-
 static void emergency_stop() {
     fprintf(stderr, "\n[!] Emergency stop!\n");
     for (int i = 0; i < 50; ++i) {
@@ -274,7 +267,6 @@ static void emergency_stop() {
 }
 
 // ─── Signal Handler ──────────────────────────────────────────────────────────
-
 static void signal_handler(int sig) {
     (void)sig;
     g_running.store(false);
@@ -285,7 +277,6 @@ static void signal_handler(int sig) {
  * Listens on UDP_LISTEN_PORT for velocity commands from the high-level.
  * Expected payload: two floats (left_rpm, right_rpm) = 8 bytes.
  */
-
 static void udp_receiver_thread() {
     int sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
@@ -382,7 +373,6 @@ static void motor_control_thread() {
  * Reads encoder positions via SDO and sends them back via UDP.
  * Payload: [left_enc (float)][right_enc (float)][timestamp (f64)] = 16 bytes
  */
-
 static void encoder_feedback_thread() {
     int sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
@@ -463,7 +453,6 @@ static void encoder_feedback_thread() {
 }
 
 // ─── Main ────────────────────────────────────────────────────────────────────
-
 int main() {
     // Install signal handlers for clean shutdown
     signal(SIGINT,  signal_handler);

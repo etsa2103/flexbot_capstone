@@ -1,4 +1,4 @@
-// udp_cmd_server.cpp  (run on IMX7)
+// udp_cmd_rx.cpp  (run on IMX7)
 // Listens on UDP :5006 for LED + LCD commands.
 
 #include <arpa/inet.h>
