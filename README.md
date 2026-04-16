@@ -114,12 +114,17 @@ If you flashed the right OS you should already have a system service that runs t
 ```yml
 [Unit]
 Description=Run bot initialization script
+# Wait for the system to be ready
 After=network.target
 
 [Service]
 Type=simple
+# If your files are in /home/pi, change User to pi
 User=root
-ExecStart=/root/flexbot_capstone/init_bot.sh
+# Set the working directory so the script knows where it is
+WorkingDirectory=/root/flexbot_capstone
+ExecStart=/bin/bash /root/flexbot_capstone/init_bot.sh
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
@@ -167,6 +172,7 @@ To be completed.
 To be completed.
 
 ---
+
 sudo ip link set can1 down
 sudo ip link set can1 up type can bitrate 1000000
 sudo ip link set can1 down
