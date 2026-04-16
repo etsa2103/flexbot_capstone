@@ -129,9 +129,11 @@ private:
       // If the keyboard is sending any non-zero command, it takes over
       if (std::abs(k_ly) > 0.001f || std::abs(k_rx) > 0.001f || std::abs(k_turret) > 0.001f) {
         kbd_active = true;
-        final_ly = k_ly;
-        final_rx = k_rx;
-        final_turret = k_turret;
+        
+        // Clamp keyboard inputs to [-1.0, 1.0] so they act identically to joystick axes
+        final_ly = std::clamp(k_ly, -1.0f, 1.0f);
+        final_rx = std::clamp(k_rx, -1.0f, 1.0f);
+        final_turret = std::clamp(k_turret, -1.0f, 1.0f);
       }
     }
 
@@ -166,11 +168,24 @@ private:
     const float forward = final_ly * (float)mix_scale_;
     const float turn    = final_rx * (float)mix_scale_;
 
-    const double left_cmd  = (forward + turn) * max_rad_s_;
-    const double right_cmd = (forward - turn) * max_rad_s_;
+    double left_cmd  = (forward + turn) * max_rad_s_;
+    double right_cmd = (forward - turn) * max_rad_s_;
     
+    // Proportional scaling: preserve the steering ratio if exceeding max_rad_s_
+    const double max_wheel_cmd = std::max(std::abs(left_cmd), std::abs(right_cmd));
+    if (max_wheel_cmd > max_rad_s_) {
+      left_cmd  = (left_cmd / max_wheel_cmd) * max_rad_s_;
+      right_cmd = (right_cmd / max_wheel_cmd) * max_rad_s_;
+    }
+
     // Turret
-    const double turret_cmd = (double)(final_turret) * turret_max_rad_s_;
+    double turret_cmd = (double)(final_turret) * turret_max_rad_s_;
+
+    // --- Absolute Safety Clamp ---
+    // Enforce a strict hard limit at the very end to guarantee max speed limits
+    left_cmd   = std::clamp(left_cmd,  -max_rad_s_, max_rad_s_);
+    right_cmd  = std::clamp(right_cmd, -max_rad_s_, max_rad_s_);
+    turret_cmd = std::clamp(turret_cmd, -turret_max_rad_s_, turret_max_rad_s_);
 
     // EMA smoothing
     const double dt = 1.0 / std::max(1.0, publish_rate_hz_);
