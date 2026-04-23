@@ -67,7 +67,7 @@ public:
       kbd_topic_, rclcpp::QoS(10),
       [this](const geometry_msgs::msg::Twist::SharedPtr msg) {
         std::lock_guard<std::mutex> lk(kbd_mtx_);
-        kbd_ly_ = msg->linear.x;    // Map to forward/back
+        kbd_ly_ = -msg->linear.x;    // Map to forward/back (inverted)
         kbd_rx_ = msg->angular.z;   // Map to turn
         kbd_turret_ = msg->linear.z; // Map to turret (teleop_twist_keyboard 't' and 'b' keys)
         last_kbd_time_ = this->now();
