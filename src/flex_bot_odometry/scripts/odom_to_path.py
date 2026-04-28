@@ -9,7 +9,8 @@ class OdomToPath(Node):
     def __init__(self):
         super().__init__("odom_to_path_simple")
 
-        self.declare_parameter("odom_topic", "/odometry/filtered")
+        #self.declare_parameter("odom_topic", "/odometry/filtered")
+        self.declare_parameter("odom_topic", "/wheel/odometry")
         self.declare_parameter("path_topic", "/wheel/path")
         self.declare_parameter("max_poses", 5000)
         self.declare_parameter("min_dist", 0.0)
@@ -64,8 +65,8 @@ class OdomToPath(Node):
         self.last = (x, y, yaw)
 
         # Debug print occasionally
-        if len(self.path.poses) % 20 == 0:
-            self.get_logger().info(f"Path poses: {len(self.path.poses)}  last=({x:.3f},{y:.3f}) yaw={yaw:.3f}")
+        #if len(self.path.poses) % 20 == 0:
+            #self.get_logger().info(f"Path poses: {len(self.path.poses)}  last=({x:.3f},{y:.3f}) yaw={yaw:.3f}")
 
 def main():
     rclpy.init()

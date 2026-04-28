@@ -8,7 +8,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 def generate_launch_description():
     teleop_share = get_package_share_directory("flex_bot_teleop")
     sensors_share = get_package_share_directory("flex_bot_sensors")
-    odom_share = get_package_share_directory("flex_bot_odom")
+    odom_share = get_package_share_directory("flex_bot_odometry")
     bringup_share = get_package_share_directory("flex_bot_bringup")
     
 
@@ -24,12 +24,8 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(sensors_share, "launch", "sensors.launch.py"))
     )
 
-    odom = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(odom_share, "launch", "wheel_odom.launch.py"))
-    )
-
-    ekf = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(bringup_share, "launch", "state_estimation.launch.py"))
+    state_estimation = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(odom_share, "launch", "state_estimation.launch.py"))
     )
 
     slam = IncludeLaunchDescription(
@@ -44,8 +40,7 @@ def generate_launch_description():
         teleop,
         static_tfs,
         sensors,
-        odom,
-        ekf,
+        state_estimation,
         slam,
         foxglove,
     ])
