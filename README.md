@@ -2,16 +2,23 @@
 
 This repository provides a step-by-step guide for setting up the High-Level CPU connected to the Berkshire Grey FlexBot. This system receives sensor data over ROS 2 topics and runs high-level functionality such as teleoperation, localization, mapping, and autonomous exploration.
 
+<p align="center">
+  <img src="imgs/angledView.jpeg" width="300">
+  <img src="imgs/sideView.jpeg" width="300">
+</p>
+
 This guide will cover the following topics:
 
 - **ROS Setup** — Installing ROS2 and package dependencies for this repo
 - **Network Setup** — Setting up the ethernet connection between the high and low level CPUs
-- **Teleoperation** — Modifying config files and running the teleop node
-- **Localization** — fill in (odom pkg)
-- **Lidar/Mapping** — Setting up the lidar and running slam toolbox
-- **Autonomous modes** — Running autonomy node to have the flexbot explore and map the environment
-- **Bringup** — How to launch all necesary ros nodes for flexbot operation
-- **Visualization** — Setting up foxglove layout and running foxglove bridge
+- **LIDAR Setup** — Configuring LIDAR ip and verifying you recieve scans
+- **Bringup** — How to launch all necesary ROS nodes for flexbot operation
+  - **Teleoperation** — Modifying config files and running the teleop node
+  - **Sensors** — Modifying config files and launching sensors
+  - **State Estimation** — Modifying config files and running encoder/imu fused state estimation
+  - **Visualization** — Setting up foxglove layout and running foxglove bridge
+  - **SLAM** — Setting up the lidar and running 2d and 3d slam packages
+  - **Autonomous modes** — (IN PROGRESS) Running autonomy node to have the flexbot explore and map the environment
 
 > **Note:** This repo has been tested and runs on a **Sapphire BP-FP6-SN** running **Ubuntu 22.04.5 LTS**. Though it should work on any system that can run ROS 2 (Humble or Jazzy). This repo also assumes it has been installed at the base of the root directory on the high level cpu.
 
@@ -100,70 +107,63 @@ Make sure the UDP IP/port settings in `flex_bot_teleop/config/flex_bot_udp.yaml`
 
 ---
 
-## Teleoperation
 
-IN TERMINAL 1:
 
-1. `cd flexbot_capstone`
-2. `source /opt/ros/{ROS_DISTRO}/setup.bash`
-3. `run colcon build`
-4. `source install/setup.bash`
-5. `ros2 launch flex_bot_teleop flex_bot.launch.py`
+## LIDAR Setup
 
-IN TERMINAL 2:
-
-1. `cd flexbot_capstone`
-2. `source /opt/ros/{ROS_DISTRO}/setup.bash`
-3. `ros2 run teleop_twist_keyboard teleop_twist_keyboard`
-
-if it says you do not have the teleop-twist-keyboard available:
-
-1. `sudo apt update`
-2. `sudo apt install ros-{ROS_DISTRO}-teleop-twist-keyboard`
-
-we have a limit on the speed to be 10 in the config file as the teleop-twist-keyboard goes up to max speed almost immediately.
-
----
-
-## Localization
-
-To be completed.
-
----
-
-## Lidar/Mapping
-
-### Lidar Setup
-
-1. If you followed the steps in "Network Setup" on the low level cpu branch you should have the IP address of the Lidar. (Ours was 192.168.2.201)
-2. Run `sudo nano /opt/ros/humble/share/velodyne_driver/config/VLP16-velodyne_driver_node-params.yaml` and change ip to match the lidar ip
+1. If you followed the steps in "Network Setup" on the low level cpu branch you should have the IP address of the LIDAR. (Ours was 192.168.2.201)
+2. Run `sudo nano /opt/ros/humble/share/velodyne_driver/config/VLP16-velodyne_driver_node-params.yaml` and change ip to match the LIDAR ip
 3. Use `ros2 launch velodyne velodyne-all-nodes-VLP16-launch.py` to test if you have set eveything up correctly. A scan topic should appear if you run `ros2 topic list`
-
-### Running 2d slam
-
-1. modify flex_bot_bringup/config/slam_config
-2. run `ros2 launch flex_bot_bringup slam_async.launch.py`
-
-### Running 3d slam
-sudo apt update
-sudo apt install ros-humble-pcl-conversions ros-humble-pcl-ros ros-humble-eigen-stl-containers
-https://github.com/Ericsii/FAST_LIO_ROS2 
----
-
-## Autonomous modes
-
-To be completed.
 
 ---
 
 ## Bringup
 
-To be completed.
+Run `ros2 launch flex_bot_bringup bringup_full.launch.py` to launch teleoperation , sensors, state estimation, 2D SLAM, and foxglove visualization. To configure and run each package individually follow the sections below.
 
----
+### Teleoperation
 
-## Visualization
+1. Configure teleoperation by modifying `flex_bot_teleop/config/teleop.yaml`
+2. Run  `ros2 launch flex_bot_teleop teleop.launch.py`
+3. Either pair your controller and start driving or if you want to use your keyboard instead make sure you install the teleop keyboard using `sudo apt install ros-{ROS_DISTRO}-teleop-twist-keyboard` and run it using `ros2 run teleop_twist_keyboard teleop_twist_keyboard`
 
-To be completed.
+> **Note:** If using a keyboard the robot will instantly drive at its max rpm speed when given a command unless you lower the speed values below 1.0. So make sure your max rpm in the teleop config file is below 40 RPM.
 
----
+### Sensors
+
+1. Sensors can be configured by modifying `flex_bot_sensors/config/flex_bot_udp.yaml`
+2. It is important you have a well defined TF tree so edit `flex_bot_sensors/config/flex_bot_udp.yaml` so that you are publishing the static transform of all your sensors from the robots base_link.
+3. Run `ros2 launch flex_bot_sensors sensors.launch.py` and `ros2 launch flex_bot_sensors static_tfs.launch.py`
+
+> **Note:** The base_link is located directly inbetween the two wheels of the robot in the xy plane and where the wheels meet the floor on the z-axis.
+
+### State Estimation
+
+The flex_bot_odometry package handles state estimation by fusing wheeled odometry with imu data and publishing the robots estimated path traveled.
+
+1. State estimation can be configured by modifying `wheel_odom.yaml` and `ekf_imu.yaml` in `flex_bot_odometry/config/`
+2. Run `ros2 launch flex_bot_odom state_estimation.launch.py`
+
+### Visualization
+
+1. Run `ros2 launch flex_bot_bringup foxglove.launch.py`
+2. Open foxglove on any device connected to the same wifi as the robot and connect to `ws://192.168.129.200:8765`. Make sure to replace the ip with whatever static ip you set for your high level computer on the local wifi
+3. Download `flex_bot_bringup/visualization/flexbot_full.json` and import the layout into foxglove
+
+Here is what the layout should look like:
+![foxglove layout](imgs/foxglove.png)
+
+### SLAM
+
+##### Running 2D SLAM
+
+1. Configure 2D SLAM by modifying `flex_bot_bringup/config/slam_config_2d.yaml`
+2. Run `ros2 launch flex_bot_bringup slam_2d.launch.py`
+
+##### Running 3D SLAM
+
+(IN PROGRESS)
+
+##### Autonomous modes
+
+(IN PROGRESS)

@@ -6,7 +6,6 @@ import os
 def generate_launch_description():
     pkg_share = get_package_share_directory("flex_bot_teleop")
 
-    udp_yaml   = os.path.join(pkg_share, "config", "flex_bot_udp.yaml")
     teleop_yaml = os.path.join(pkg_share, "config", "teleop.yaml")
 
     return LaunchDescription([
@@ -21,14 +20,6 @@ def generate_launch_description():
                 "deadzone": 0.05,
                 "autorepeat_rate": 50.0,
             }],
-        ),
-
-        Node(
-            package="flex_bot_teleop",
-            executable="flex_bot_udp_bridge",
-            name="flex_bot_udp_bridge",
-            output="screen",
-            parameters=[udp_yaml],
         ),
 
         Node(

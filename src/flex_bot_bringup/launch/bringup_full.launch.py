@@ -6,32 +6,46 @@ from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 def generate_launch_description():
-    pkg_share = get_package_share_directory("flex_bot_bringup")
+    teleop_share = get_package_share_directory("flex_bot_teleop")
+    sensors_share = get_package_share_directory("flex_bot_sensors")
+    odom_share = get_package_share_directory("flex_bot_odom")
+    bringup_share = get_package_share_directory("flex_bot_bringup")
+    
 
-    foxglove = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(pkg_share, "launch", "foxglove.launch.py"))
-    )
-
-    sensors = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(pkg_share, "launch", "sensors.launch.py"))
+    teleop = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(teleop_share, "launch", "teleop.launch.py"))
     )
 
     static_tfs = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(pkg_share, "launch", "static_tfs.launch.py"))
+        PythonLaunchDescriptionSource(os.path.join(sensors_share, "launch", "static_tfs.launch.py"))
+    )
+
+    sensors = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(sensors_share, "launch", "sensors.launch.py"))
+    )
+
+    odom = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(odom_share, "launch", "wheel_odom.launch.py"))
     )
 
     ekf = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(pkg_share, "launch", "state_estimation.launch.py"))
+        PythonLaunchDescriptionSource(os.path.join(bringup_share, "launch", "state_estimation.launch.py"))
     )
 
     slam = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(pkg_share, "launch", "slam_2d.launch.py"))
+        PythonLaunchDescriptionSource(os.path.join(bringup_share, "launch", "slam_2d.launch.py"))
+    )
+
+    foxglove = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(bringup_share, "launch", "foxglove.launch.py"))
     )
 
     return LaunchDescription([
-        foxglove,
-        sensors,
+        teleop,
         static_tfs,
+        sensors,
+        odom,
         ekf,
-        #slam
+        slam,
+        foxglove,
     ])
