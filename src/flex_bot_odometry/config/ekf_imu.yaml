@@ -53,8 +53,8 @@ ekf_filter_node:
     imu0_config: [false, false, false, # Position
                   false, false, true,  # Orientation (Yaw)
                   false, false, false, # Velocity
-                  false, false, true,  # Angular Velocity (wz)
-                  true,  true,  false] # Linear Acceleration (ax, ay)
+                  false, false, false,  # Angular Velocity (wz)
+                  false,  false,  false] # Linear Acceleration (ax, ay)
 
     
  

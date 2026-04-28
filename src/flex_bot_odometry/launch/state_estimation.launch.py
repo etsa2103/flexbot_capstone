@@ -20,7 +20,7 @@ def generate_launch_description():
             name="wheel_odom_node",
             output="screen",
             parameters=[odom_yaml],
-        ),
+        )
 
     ekf_node = Node(
         package="robot_localization",
@@ -32,7 +32,7 @@ def generate_launch_description():
 
     odom_path_node = Node(
         package="flex_bot_odometry",
-        executable="odom_to_path",
+        executable="odom_to_path.py",
         name="odom_path_node",
         output="screen",
     )
@@ -41,6 +41,6 @@ def generate_launch_description():
         DeclareLaunchArgument("odom_yaml", default_value=default_odom_params),
         DeclareLaunchArgument("ekf_yaml", default_value=default_ekf_params),
         odom_node,
-        ekf_node,
+        #ekf_node,
         odom_path_node,
     ])

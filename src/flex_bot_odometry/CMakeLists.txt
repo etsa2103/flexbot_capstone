@@ -38,4 +38,9 @@ install(DIRECTORY launch config
   DESTINATION share/${PROJECT_NAME}
 )
 
+install(PROGRAMS
+  scripts/odom_to_path.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_package()

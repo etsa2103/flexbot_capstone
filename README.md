@@ -139,7 +139,7 @@ Run `ros2 launch flex_bot_bringup bringup_full.launch.py` to launch teleoperatio
 
 ### State Estimation
 
-The flex_bot_odometry package handles state estimation by fusing wheeled odometry with imu data and publishing the robots estimated path traveled.
+The flex_bot_odometry package handles state estimation by fusing wheeled odometry with imu data and publishing the robots estimated path traveled.(Right now the imu is not calibrated so state_estimation is configured just to use wheel odometry)
 
 1. State estimation can be configured by modifying `wheel_odom.yaml` and `ekf_imu.yaml` in `flex_bot_odometry/config/`
 2. Run `ros2 launch flex_bot_odom state_estimation.launch.py`

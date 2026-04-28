@@ -14,7 +14,7 @@ wheel_odom_node:
 
     # Update rate
     publish_rate_hz: 50.0
-    publish_tf: false
+    publish_tf: True
 
     # Probabilistic motion model (preserve your ESP32 semantics)
     alpha1: 0.01
