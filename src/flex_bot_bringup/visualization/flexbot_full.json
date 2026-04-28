@@ -84,16 +84,17 @@
       },
       "leftButton": {
         "field": "angular-z",
-        "value": 1
+        "value": 0.4
       },
       "rightButton": {
         "field": "angular-z",
-        "value": -1
+        "value": -0.4
       },
       "stopButton": {
         "field": "linear-x",
         "value": 0
-      }
+      },
+      "topic": "/cmd_vel"
     },
     "Gauge!3c10cw4": {
       "path": "/cmd_vel.linear.x",
@@ -143,7 +144,7 @@
     "TransformTree!3usrwpl": {},
     "RawMessages!yg3g8i": {
       "defaultExpanded": false,
-      "topicPath": ""
+      "topicPath": "/xsens_imu"
     },
     "SourceInfo!2i6gcu9": {},
     "Parameters!3e2awvq": {},
@@ -232,11 +233,11 @@
       },
       "leftButton": {
         "field": "angular-z",
-        "value": 1
+        "value": 0.4
       },
       "rightButton": {
         "field": "angular-z",
-        "value": -1
+        "value": -0.4
       },
       "stopButton": {
         "field": "linear-x",
@@ -395,13 +396,13 @@
     "3D!2gfg8ff": {
       "cameraState": {
         "perspective": true,
-        "distance": 9.753499582251147,
-        "phi": 67.10091145035226,
-        "thetaOffset": -77.7389862484509,
+        "distance": 23.327015599780932,
+        "phi": 0.00005729832627056611,
+        "thetaOffset": -64.04236969925589,
         "targetOffset": [
-          -0.03516090563320955,
-          -0.0198162996150257,
-          -8.377257808833328e-17
+          -3.8692987392530798,
+          0.5307025604331459,
+          5.006111952199763e-18
         ],
         "target": [
           0,
@@ -419,7 +420,7 @@
         "far": 5000
       },
       "followMode": "follow-none",
-      "fixedFrame": "base_link",
+      "fixedFrame": "map",
       "scene": {
         "enableStats": true,
         "backgroundColor": "#3b3b3c",
@@ -515,6 +516,9 @@
         },
         "/set_pose": {
           "visible": false
+        },
+        "/wheel/path": {
+          "visible": true
         }
       },
       "layers": {
@@ -572,7 +576,7 @@
       },
       "synchronize": false,
       "imageMode": {},
-      "followTf": "base_link"
+      "followTf": "map"
     }
   },
   "globalVariables": {},
