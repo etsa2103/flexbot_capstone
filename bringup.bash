@@ -3,7 +3,7 @@
 ### ========= USER CONFIG ========= ###
 SESSION_NAME="ros_session"
 ROS_SETUP="/opt/ros/humble/setup.bash" 
-FLEXBOT_WS="~/flexbot_capstone/"
+FLEXBOT_WS="/home/flexbot/flexbot_capstone/"
 ### ================================= ###
 
 if tmux has-session -t $SESSION_NAME 2>/dev/null; then
@@ -46,7 +46,7 @@ tmux send-keys -t $SESSION_NAME:0.1 "ros2 launch flex_bot_teleop flex_bot.launch
 sleep 5
 tmux send-keys -t $SESSION_NAME:0.2 "ros2 run teleop_twist_keyboard teleop_twist_keyboard" C-m
 sleep 5
-tmux send-keys -t $SESSION_NAME:0.3 "ros2 launch " C-m
+tmux send-keys -t $SESSION_NAME:0.3 "ros2 launch flex_bot_bringup slam_3d.launch.py" C-m
 
 ### ======================================== ###
 # Attach to session

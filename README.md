@@ -139,11 +139,15 @@ To be completed.
 2. Run `sudo nano /opt/ros/humble/share/velodyne_driver/config/VLP16-velodyne_driver_node-params.yaml` and change ip to match the lidar ip
 3. Use `ros2 launch velodyne velodyne-all-nodes-VLP16-launch.py` to test if you have set eveything up correctly. A scan topic should appear if you run `ros2 topic list`
 
-### Running slam toolbox
+### Running 2d slam
 
 1. modify flex_bot_bringup/config/slam_config
 2. run `ros2 launch flex_bot_bringup slam_async.launch.py`
 
+### Running 3d slam
+sudo apt update
+sudo apt install ros-humble-pcl-conversions ros-humble-pcl-ros ros-humble-eigen-stl-containers
+https://github.com/Ericsii/FAST_LIO_ROS2 
 ---
 
 ## Autonomous modes

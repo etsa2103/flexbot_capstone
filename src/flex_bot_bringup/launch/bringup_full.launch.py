@@ -25,7 +25,7 @@ def generate_launch_description():
     )
 
     slam = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(pkg_share, "launch", "slam_async.launch.py"))
+        PythonLaunchDescriptionSource(os.path.join(pkg_share, "launch", "slam_2d.launch.py"))
     )
 
     return LaunchDescription([
@@ -33,5 +33,5 @@ def generate_launch_description():
         sensors,
         static_tfs,
         ekf,
-        slam
+        #slam
     ])

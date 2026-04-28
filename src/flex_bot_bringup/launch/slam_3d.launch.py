@@ -9,20 +9,20 @@ from launch.substitutions import LaunchConfiguration
 
 def generate_launch_description():
     pkg_share = get_package_share_directory("flex_bot_bringup")
-    default_params = os.path.join(pkg_share, "config", "slam_config_2d.yaml")
-    
-    slam_params_file = LaunchConfiguration("slam_params_file")
+    default_config_file = os.path.join(pkg_share, "config", "slam_config_3d.yaml")
 
-    slam_share = get_package_share_directory("slam_toolbox")
-    slam_launch = os.path.join(slam_share, "launch", "online_async_launch.py")
+    slam_config_file = LaunchConfiguration("slam_config_file")
+
+    slam_share = get_package_share_directory("rko_lio")
+    slam_launch = os.path.join(slam_share, "launch", "odometry.launch.py")
 
     return LaunchDescription([
-        DeclareLaunchArgument("slam_params_file", default_value=default_params),
+        DeclareLaunchArgument("slam_config_file", default_value=default_config_file),
 
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(slam_launch),
             launch_arguments={
-                "slam_params_file": slam_params_file
+                "config_file": slam_config_file
             }.items(),
         ),
     ])

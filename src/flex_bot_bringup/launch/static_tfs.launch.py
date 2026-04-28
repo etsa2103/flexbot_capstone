@@ -3,7 +3,7 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    # tf_imu = Node(
+    # tf_tof_left = Node(
     #     package="tf2_ros",
     #     executable="static_transform_publisher",
     #     name="static_tf_xsens_imu",
@@ -11,20 +11,38 @@ def generate_launch_description():
     #     arguments=["0", "0", "0", "0", "0", "0", "base_link", "xsens_imu"],
     # )
 
-    # tf_tof = Node(
+    # tf_tof_right = Node(
     #     package="tf2_ros",
     #     executable="static_transform_publisher",
-    #     name="static_tf_sick_imu",
+    #     name="static_tf_xsens_imu",
     #     output="screen",
-    #     arguments=["0", "0", "0", "0", "0", "0", "base_link", "sick_imu"],
+    #     arguments=["0", "0", "0", "0", "0", "0", "base_link", "xsens_imu"],
     # )
-
+    
     tf_lidar = Node(
         package="tf2_ros",
         executable="static_transform_publisher",
         name="static_tf_velodyne",
         output="screen",
-        arguments=["0", "0", "0", "0", "0", "0", "base_link", "velodyne"],
+        arguments=["0.16", "0", "0.31", "0", "0.122", "0", "base_link", "velodyne"],
     )
 
-    return LaunchDescription([tf_lidar])
+    tf_imu = Node(
+    package="tf2_ros",
+    executable="static_transform_publisher",
+    name="static_tf_xsens_imu",
+    output="screen",
+    arguments=[
+        "--qx", "0",
+        "--qy", "0",
+        "--qz", "0",
+        "--qw", "0",
+        "--x", "0.08",
+        "--y", "-0.17",
+        "--z", "0.04",
+        "--frame-id", "base_link",
+        "--child-frame-id", "xsens_imu"
+    ],
+    )
+
+    return LaunchDescription([tf_lidar, tf_imu])
