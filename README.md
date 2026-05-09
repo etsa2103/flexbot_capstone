@@ -7,7 +7,6 @@ This guide will cover the following topics:
 - **Flashing Custom Operating System** — This section covers the steps of flashing our custom Linux Operating System on a micro sd card and installing it on the Flexbots low level computer.
 - **Network Setup** — Setting IPs so the low and high level CPUs can communicate.
 - **Setting up system services** — Creating system services that auto launch scripts for arming motors and setting up communication between the low and high level CPUs.
-- **File system** — Summary of each file and its specific use in the flexbot system
 
 > **Note:** This repo assumes it has been installed at the base of the root directory on the low level cpu.
 
@@ -35,7 +34,7 @@ To access the microSD card:
 1. Power off the robot completely.
 2. Flip the robot upside down.
 3. Remove the charging pad bracket.
-4. Locate the microSD card inserted in the APB (Auxiliary Processing Board).
+4. Locate the microSD card inserted in the APB (Application Processing Board).
 
 > **Note:** For a detailed overview of FlexBot hardware components, refer to the [hardware documentation](https://miro.com/app/board/uXjVJ2xI5w8=/?share_link_id=938604789528).
 
@@ -97,7 +96,7 @@ nmcli con up br0
 
 #### High Level CPU
 
-High level control is handled by an Sapphire BP-FP6-SN mounted on the flexbot and connected to the low level CPU via ethernet. See the `master` branch of this repository for that code and documentation.
+High level control is handled by an Sapphire BP-FP6-SN mounted on the flexbot and connected to the low level CPU via ethernet. See the `high_level_cpu` branch of this repository for that code and documentation.
 
 In order for the two CPUs to communicate, you must make sure they know each other's IP address. Make sure the UDP IP/port settings in `UDP/imu_udp_tx.cpp` , `UDP/motor_controller.cpp` and `UDP/udp_cmd_client` match what is configured on the high level cpu.
 
@@ -139,39 +138,6 @@ sudo systemctl enable minit_bot.service
 sudo systemctl start init_bot.service
 ```
 
----
-
-## File System
-
-### BAT
-
-To be completed.
-
-### IMU
-
-To be completed.
-
-### LCD
-
-To be completed.
-
-### LED
-
-To be completed.
-
-### MOTORS
-
-To be completed.
-
-### PGV
-
-To be completed.
-
-### UDP
-
-To be completed.
-
----
 
 sudo ip link set can1 down
 sudo ip link set can1 up type can bitrate 1000000
