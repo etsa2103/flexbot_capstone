@@ -3,7 +3,10 @@
 ## Overview
 
 Berkshire Grey dropped off 30 differential drive industrial robots known as FlexBots to the University of Pennsylvania. The goal of this capstone project was to reverse engineer the FlexBot and repurpose it to be used for future research projects at Penn. I started by disassembling the robot, documenting all its components, and mapping out all the electrical connections. Next, I connected to the onboard computer and evaluated the robot's custom control software. Once I gained control of the motors and was able to read the data from the sensors, I removed the top rotary stage and mounted a LIDAR and external computer. Finally, I integrated the whole system into ROS to enable teleoperation, odometry, and SLAM.
-
+<p align="center">
+  <img src="imgs/angledView.jpeg" width="300">
+  <img src="imgs/sideView.jpeg" width="300">
+</p>
 ---
 
 ## Hardware
@@ -27,8 +30,8 @@ The rotary stage was originally included to allow the top section of the robot t
 ## Electrical Connections
 
 The diagram below shows the overall electrical layout of the robot and how the different PCBs connect to each other. Rather than labeling every individual wire within each cable, the diagram focuses on the main connectors and subsystem relationships to keep the system architecture easier to understand.
-
-**Figure ##: Circuit Diagram of Flexbot’s Internal Electronics**
+![circuit-diagram](imgs/flexbot-circuit-diagram.png)
+**Figure 1: Circuit Diagram of Flexbot’s Internal Electronics**
 
 ---
 
@@ -47,8 +50,8 @@ All code developed for the low level computer onboard the flexbot can be found i
 I made several hardware modifications to repurpose the FlexBot for standard research applications. First, to overcome restrictions imposed by the proprietary safety board, I disconnected it and manually rerouted 24V to each of the Safety Torque Off (STO) pins on the MCBs. This 24 volts was taken from the PDB and routed through both Emergency Stop (E-stop) buttons to ensure the robot remained safe to operate.
 
 Next, I worked with Jaimes Romero to remove the original rotary stage mechanism and replace it with a custom-fabricated top plate, providing a stable and flat mounting surface for external hardware. We also designed and 3D-printed custom mounts for a VLP-16 LIDAR and an external high-level computer. We tapped into the robot's Power Distribution Board (PDB) to route the appropriate voltage to the new top plate. The full hardware breakdown is summarized in the figure below and the modified hardware is documented in the Hardware Miro Board.
-
-**Figure ##: Hardware Breakdown of Modified Flexbot**
+![modified-hardware-breakdown](imgs/modified-hardware-breakdown.png)
+**Figure 2: Hardware Breakdown of Modified Flexbot**
 
 Finally, the original system relied on Berkshire Grey charging docks, which we had no access to. Instead of creating our own charging docks, for safety, I ordered a charger so the batteries could be recharged.
 
@@ -57,12 +60,12 @@ Finally, the original system relied on Berkshire Grey charging docks, which we h
 ## ROS Integration
 
 To integrate the FlexBot into ROS 2, I established a dedicated Ethernet connection between the robot's low-level embedded computer and the new external high-level CPU. The low-level system processes raw hardware telemetry and continuously streams it as UDP packets to the high-level computer. There, custom ROS 2 nodes capture this UDP data and publish it to standard ROS topics. This architecture powers a teleoperation package that translates manual inputs into safe motor commands while simultaneously calculating precise wheel odometry. By combining this odometry with data from the integrated VLP-16 LiDAR, the system successfully runs a 2D SLAM pipeline to generate real-time maps of its environment. The full software breakdown is summarized in the figure below.
-
-**Figure ##: Software Breakdown of Modified Flexbot**
+![software-breakdown](imgs/software-breakdown.png)
+**Figure 3: Software Breakdown of Modified Flexbot**
 
 Finally, all operational data, including the live map, sensor feeds, and hardware status, is streamed to a custom Foxglove Studio dashboard for comprehensive, real-time monitoring as shown below.
-
-**Figure ##: Foxglove**
+![foxglove](imgs/foxglove.png)
+**Figure 4: Foxglove**
 
 All code developed for the high level computer can be found in this branch of the project Github. It also contains a clear README with everything you should need to replicate this setup on your own.
 
@@ -105,11 +108,3 @@ There are several remaining limitations and future improvements for the FlexBot 
 
 - Slack  
   https://app.slack.com/client/T09S1APBSHY/D09S4T6TL04
-
----
-
-## TODO
-
-- finish last section  
-- polish this document  
-- update miro with new hardware
