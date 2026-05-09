@@ -1,169 +1,115 @@
-# High Level CPU Setup for Flex Bot
+# FlexBot Reverse Engineering and ROS Integration
 
-This repository provides a step-by-step guide for setting up the High-Level CPU connected to the Berkshire Grey FlexBot. This system receives sensor data over ROS 2 topics and runs high-level functionality such as teleoperation, localization, mapping, and autonomous exploration.
+## Overview
 
-<p align="center">
-  <img src="imgs/angledView.jpeg" width="300">
-  <img src="imgs/sideView.jpeg" width="300">
-</p>
-
-This guide will cover the following topics:
-
-- **ROS Setup** — Installing ROS2 and package dependencies for this repo
-- **Network Setup** — Setting up the ethernet connection between the high and low level CPUs
-- **LIDAR Setup** — Configuring LIDAR ip and verifying you recieve scans
-- **Bringup** — How to launch all necesary ROS nodes for flexbot operation
-  - **Teleoperation** — Modifying config files and running the teleop node
-  - **Sensors** — Modifying config files and launching sensors
-  - **State Estimation** — Modifying config files and running encoder/imu fused state estimation
-  - **Visualization** — Setting up foxglove layout and running foxglove bridge
-  - **SLAM** — Setting up the lidar and running 2d and 3d slam packages
-  - **Autonomous modes** — (IN PROGRESS) Running autonomy node to have the flexbot explore and map the environment
-
-> **Note:** This repo has been tested and runs on a **Sapphire BP-FP6-SN** running **Ubuntu 22.04.5 LTS**. Though it should work on any system that can run ROS 2 (Humble or Jazzy). This repo also assumes it has been installed at the base of the root directory on the high level cpu.
+Berkshire Grey dropped off 30 differential drive industrial robots known as FlexBots to the University of Pennsylvania. The goal of this capstone project was to reverse engineer the FlexBot and repurpose it to be used for future research projects at Penn. I started by disassembling the robot, documenting all its components, and mapping out all the electrical connections. Next, I connected to the onboard computer and evaluated the robot's custom control software. Once I gained control of the motors and was able to read the data from the sensors, I removed the top rotary stage and mounted a LIDAR and external computer. Finally, I integrated the whole system into ROS to enable teleoperation, odometry, and SLAM.
 
 ---
 
-## Attribution
+## Hardware
 
-This codebase is adapted from work originally developed by Kartik Virmani.
-It has been modified to support the VLP-16 LiDAR and simplified for clarity and instructional use.
+After disassembling the robot I separated the components into 3 subsections: The Mobile Base, Scissor Lift Stage, and Rotary Stage. Below is a quick description of each stage, but please refer to this [Miro Board](https://miro.com/app/board/uXjVJ2xI5w8=/) for the full hardware documentation.
 
----
+### Mobile Base
 
-## ROS Setup
+The mobile base is the main working platform of the robot and contains most of the important systems. Two drive motors allow the robot to move around, while the onboard electronics control power distribution, computation, and sensing. The base contains components such as the Motor Control Boards (MCBs), Power Distribution Board (PDB), sensors, LEDs, WiFi antennas, and the main compute board (APB). These systems work together to help the robot operate autonomously, process sensor data, and communicate with other systems.
 
-Follow this guide to [install ROS2](https://docs.ros.org/en/humble/Installation.html)
+### Scissor Lift Stage
 
-**Option 1 Use rosdep for dependancies:**
+The scissor lift stage sits on top of the Mobile Base and gives the robot vertical movement by raising and lowering the top platform. It uses a scissor lift mechanism powered by the lift motor to extend upward when needed. It also contains a wire management channel to route cables from the mobile base to the rotary stage without getting pinched.
 
-```bash
-sudo rosdep init
-rosdep update
-cd ~/flexbot_capstone
-rosdep install --from-paths src --ignore-src -r -y
-```
+### Rotary Stage
 
-**Option 2 Manually install dependancies:**
-
-1. Run `sudo apt update`
-2. Install foxglove bridge for visualization: `sudo apt install ros-$ROS_DISTRO-foxglove-bridge`
-3. Install robot-localization package: `sudo apt install ros-$ROS_DISTRO-robot-localization`
-4. Install velodyne ros package: `sudo apt install ros-$ROS_DISTRO-velodyne`
-5. install keyboard teleop package: `sudo apt install ros-$ROS_DISTRO-teleop-twist-keyboard`
-
-With all dependancies installed you can build the workspace using the following commands.
-
-```bash
-cd ~/flexbot_capstone
-colcon build --symlink-install
-source install/setup.bash
-```
-
-Next add ros domain id to bashrc using the following commands.
-
-```bash
-nano ~/.bashrc
-export ROS_DOMAIN_ID=200
-```
-
-> **Note:** This is so your ros nodes do not talk to other ros instances on the network
+The rotary stage was originally included to allow the top section of the robot to rotate independently from the base. It used a rotary motor and rotating platform mechanism to provide smooth turning motion for sensors or attachments mounted on top. This stage is present on the original flexbots donated to Penn, but for this project has been removed and power for the rotary motor has been diverted to the external computer and LIDAR.
 
 ---
 
-## Network Setup
+## Electrical Connections
 
-First I suggest [setting a static IP](https://www.freecodecamp.org/news/setting-a-static-ip-in-ubuntu-linux-ip-address-tutorial/) on your local wifi so you can remotely access the high level computer. We used `192.168.129.200` and our username is `flexbot` so it can be accessed using `ssh flexbot@192.168.129.200`
+The diagram below shows the overall electrical layout of the robot and how the different PCBs connect to each other. Rather than labeling every individual wire within each cable, the diagram focuses on the main connectors and subsystem relationships to keep the system architecture easier to understand.
 
-For the High Level CPU to communicate with the Low Level CPU each needs to assign an IP Address to the Ethernet interface connecting the two. On our system we used the following IPs:
-
-**High Level IP:** `192.168.10.20`
-
-**Low Level IP:** `192.168.10.2`
-
-### Setting Static IP
-
-1. Run `nmcli con show` to view all network connections and use `nmcli connection delete <connection_name>` to delete any connections you don't care about (Usually all but the wifi connection)
-2. Find the name of the ethernet interface to the low level cpu. You can do this by unplugging the device, running `ip a`, reconnecting the device, and running `ip a` again. (For us the low level cpu was *`enp1s0`*)
-3. Run the following command to create a connection between the cpus and to set its IP. Make sure you replace `<interface_name>` with the interface name you found in step 2 and replace `<high_level_ip>` with your chosen IP.
-
-```bash
-# Create connection
-nmcli con add type ethernet ifname <interface_name> con-name cpu-link \
-    ipv4.method manual \
-    ipv4.addresses <high_level_ip>/24
-
-# Refresh the connection
-nmcli con up cpu-link
-```
-
-> **Note:** Sometimes other network management systems can override the network settings we changed with nmcli. I suggest resetting the cpu after making changes to see if they remain on reboot. If not, look into other network presets such at netplan. Also run `ip a` and make sure this ethernet connection is the only interface on your computer with this IP.
-
-### Low Level CPU
-
-The embedded firmware runs on the flexbot's IMX7 computer. This handles low-level motor control, sensor readings, and UDP packet formatting. See the `low_level_cpu` branch of this repository for that code and documentation
-
-Make sure the UDP IP/port settings in `flex_bot_teleop/config/flex_bot_udp.yaml` match what is configured on the IMX7 side.
+**Figure ##: Circuit Diagram of Flexbot’s Internal Electronics**
 
 ---
 
+## Software Analysis
 
+To gain control over the FlexBot's internal systems, I began by establishing direct serial communication with the onboard CPU. This connection allowed me to monitor the boot sequence and understand the base operating system environment. I found that the CPU automatically tried connecting to a WiFi network called `bg-flexbot-wifi6`, so I spoofed the expected network to grant me full SSH access to the internal filesystem.
 
-## LIDAR Setup
+With access secured, gaining control of the motors required reverse engineering the internal CAN network which I did with the help of Kartik Virmani of MOD lab. By using the robot's built-in maintenance program to send known movement commands, we monitored the resulting CAN traffic. By matching the data packets to specific inputs, we mapped out the CAN IDs for motor velocities and sensor data, ultimately allowing us to write custom control scripts that bypassed the original software entirely.
 
-1. If you followed the steps in "Network Setup" on the low level cpu branch you should have the IP address of the LIDAR. (Ours was 192.168.2.201)
-2. Run `sudo nano /opt/ros/humble/share/velodyne_driver/config/VLP16-velodyne_driver_node-params.yaml` and change ip to match the LIDAR ip
-3. Use `ros2 launch velodyne velodyne-all-nodes-VLP16-launch.py` to test if you have set eveything up correctly. A scan topic should appear if you run `ros2 topic list`
+All code developed for the low level computer onboard the flexbot can be found in this branch of the project Github. It also contains a clear README with everything you should need to replicate this setup on your own.
 
 ---
 
-## Bringup
+## Modifications
 
-Run `ros2 launch flex_bot_bringup bringup_full.launch.py` to launch teleoperation , sensors, state estimation, 2D SLAM, and foxglove visualization. To configure and run each package individually follow the sections below.
+I made several hardware modifications to repurpose the FlexBot for standard research applications. First, to overcome restrictions imposed by the proprietary safety board, I disconnected it and manually rerouted 24V to each of the Safety Torque Off (STO) pins on the MCBs. This 24 volts was taken from the PDB and routed through both Emergency Stop (E-stop) buttons to ensure the robot remained safe to operate.
 
-### Teleoperation
+Next, I worked with Jaimes Romero to remove the original rotary stage mechanism and replace it with a custom-fabricated top plate, providing a stable and flat mounting surface for external hardware. We also designed and 3D-printed custom mounts for a VLP-16 LIDAR and an external high-level computer. We tapped into the robot's Power Distribution Board (PDB) to route the appropriate voltage to the new top plate. The full hardware breakdown is summarized in the figure below and the modified hardware is documented in the Hardware Miro Board.
 
-1. Configure teleoperation by modifying `flex_bot_teleop/config/teleop.yaml`
-2. Run  `ros2 launch flex_bot_teleop teleop.launch.py`
-3. Either pair your controller and start driving or if you want to use your keyboard instead make sure you install the teleop keyboard using `sudo apt install ros-{ROS_DISTRO}-teleop-twist-keyboard` and run it using `ros2 run teleop_twist_keyboard teleop_twist_keyboard`
+**Figure ##: Hardware Breakdown of Modified Flexbot**
 
-> **Note:** If using a keyboard the robot will instantly drive at its max rpm speed when given a command unless you lower the speed values below 1.0. So make sure your max rpm in the teleop config file is below 40 RPM.
+Finally, the original system relied on Berkshire Grey charging docks, which we had no access to. Instead of creating our own charging docks, for safety, I ordered a charger so the batteries could be recharged.
 
-### Sensors
+---
 
-1. Sensors can be configured by modifying `flex_bot_sensors/config/flex_bot_udp.yaml`
-2. It is important you have a well defined TF tree so edit `flex_bot_sensors/config/flex_bot_udp.yaml` so that you are publishing the static transform of all your sensors from the robots base_link.
-3. Run `ros2 launch flex_bot_sensors sensors.launch.py` and `ros2 launch flex_bot_sensors static_tfs.launch.py`
+## ROS Integration
 
-> **Note:** The base_link is located directly inbetween the two wheels of the robot in the xy plane and where the wheels meet the floor on the z-axis.
+To integrate the FlexBot into ROS 2, I established a dedicated Ethernet connection between the robot's low-level embedded computer and the new external high-level CPU. The low-level system processes raw hardware telemetry and continuously streams it as UDP packets to the high-level computer. There, custom ROS 2 nodes capture this UDP data and publish it to standard ROS topics. This architecture powers a teleoperation package that translates manual inputs into safe motor commands while simultaneously calculating precise wheel odometry. By combining this odometry with data from the integrated VLP-16 LiDAR, the system successfully runs a 2D SLAM pipeline to generate real-time maps of its environment. The full software breakdown is summarized in the figure below.
 
-### State Estimation
+**Figure ##: Software Breakdown of Modified Flexbot**
 
-The flex_bot_odometry package handles state estimation by fusing wheeled odometry with imu data and publishing the robots estimated path traveled.(Right now the imu is not calibrated so state_estimation is configured just to use wheel odometry)
+Finally, all operational data, including the live map, sensor feeds, and hardware status, is streamed to a custom Foxglove Studio dashboard for comprehensive, real-time monitoring as shown below.
 
-1. State estimation can be configured by modifying `wheel_odom.yaml` and `ekf_imu.yaml` in `flex_bot_odometry/config/`
-2. Run `ros2 launch flex_bot_odom state_estimation.launch.py`
+**Figure ##: Foxglove**
 
-### Visualization
+All code developed for the high level computer can be found in this branch of the project Github. It also contains a clear README with everything you should need to replicate this setup on your own.
 
-1. Run `ros2 launch flex_bot_bringup foxglove.launch.py`
-2. Open foxglove on any device connected to the same wifi as the robot and connect to `ws://192.168.129.200:8765`. Make sure to replace the ip with whatever static ip you set for your high level computer on the local wifi
-3. Download `flex_bot_bringup/visualization/flexbot_full.json` and import the layout into foxglove
+---
 
-Here is what the layout should look like:
-![foxglove layout](imgs/foxglove.png)
+## Side Notes and Next Steps
 
-### SLAM
+There are several remaining limitations and future improvements for the FlexBot platform. When charging the robot, it is important to ensure that the main power switch remains on, as the batteries will not charge otherwise. While the mobile base and LiDAR are fully operational, the scissor lift stage, LEDs, LCD display, PGV, and time of flight sensors are currently not fully integrated. The `low_level_cpu` branch has some scripts that attempt to access these parts of the hardware, but this control has not yet been exposed by a ROS node running on the high level cpu. Moving forward, the next major development goal is integrating a 3D SLAM pipeline to take advantage of the full capabilities of the mounted VLP-16 LiDAR. After reliable 3D mapping is achieved, future work will focus on implementing obstacle avoidance and autonomous exploration or mapping behaviors, allowing the FlexBot to operate with greater autonomy in research environments.
 
-##### Running 2D SLAM
+---
 
-1. Configure 2D SLAM by modifying `flex_bot_bringup/config/slam_config_2d.yaml`
-2. Run `ros2 launch flex_bot_bringup slam_2d.launch.py`
+## Appendix
 
-##### Running 3D SLAM
+### Previous Documentation
 
-(IN PROGRESS)
+- BG Flexbot manual  
+  https://cornell.box.com/s/qmkmx8giolcgj92opy3ygfzgm6xuyje4
 
-##### Autonomous modes
+- Cornell Box  
+  https://app.box.com/folder/348944125989?s=29tjvikns65o8l0exeabmyehw10j4b1x
 
-(IN PROGRESS)
+### Penn Documentation
+
+- My Github  
+  https://github.com/etsa2103/flexbot_capstone
+
+- Kartik’s Github  
+  https://github.com/virmani11kartik/bg_bot
+
+- Kumar Robotic’s Github  
+  https://github.com/KumarRobotics/kr_flexbot
+
+- Miro Hardware Documentation  
+  https://miro.com/app/board/uXjVJ2xI5w8=/
+
+- Circuit diagram  
+  https://www.circuitlab.com/circuit/pdmw4kpy644g/flexbot-circuit-diagram/
+
+### Communication Channels
+
+- Slack  
+  https://app.slack.com/client/T09S1APBSHY/D09S4T6TL04
+
+---
+
+## TODO
+
+- finish last section  
+- polish this document  
+- update miro with new hardware
