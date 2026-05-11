@@ -16,7 +16,7 @@ After disassembling the robot I separated the components into 3 subsections: The
 
 ### Mobile Base
 
-The mobile base is the main working platform of the robot and contains most of the important systems. Two drive motors allow the robot to move around, while the onboard electronics control power distribution, computation, and sensing. The base contains components such as the Motor Control Boards (MCBs), Power Distribution Board (PDB), sensors, LEDs, WiFi antennas, and the main compute board (APB). These systems work together to help the robot operate autonomously, process sensor data, and communicate with other systems.
+The mobile base is the main working platform of the robot and contains most of the important systems. Two drive motors allow the robot to move around, while the onboard electronics control power distribution, computation, and sensing. The base contains components such as the Motor Control Boards (MCBs), Power Distribution Board (PDB), sensors, LEDs, WiFi antennas, and the Application Processor Board (APB). These systems work together to help the robot operate autonomously, process sensor data, and communicate with other systems.
 
 ### Scissor Lift Stage
 
@@ -55,7 +55,7 @@ To repurpose the FlexBot for standard research applications, I made several hard
 
 First, to bypass restrictions imposed by the proprietary safety board, I disconnected the board and manually rerouted 24V power to each of the Safety Torque Off (STO) pins on the Motor Control Boards (MCBs). This 24V supply was sourced from the Power Distribution Board (PDB) and routed through both Emergency Stop (E-stop) buttons, preserving a functional hardware safety mechanism during operation.
 
-Next, I collaborated with Jaimes Romero to remove the original rotary stage and replace it with a custom-fabricated top plate, creating a stable and flat mounting surface for new hardware. We also designed and 3D-printed custom mounts for a VLP-16 LIDAR, external high-level computer, and power distribution components. The CAD files for these mounts can be found [here](CAD). To power the new components, we tapped directly into the robot’s PDB and routed the required voltages to the top plate assembly.
+Next, I collaborated with Jaime Romero to remove the original rotary stage and replace it with a custom-fabricated top plate, creating a stable and flat mounting surface for new hardware. We also designed and 3D-printed custom mounts for a VLP-16 LIDAR, external high-level computer, and power distribution components. The CAD files for these mounts can be found [here](CAD). To power the new components, we tapped directly into the robot’s PDB and routed the required voltages to the top plate assembly.
 
 The resulting hardware architecture is summarized in the figure below, while additional documentation can be found in the modified hardware section of the [Miro Board](https://miro.com/app/board/uXjVJ2xI5w8=/).
 
