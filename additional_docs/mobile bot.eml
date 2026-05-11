@@ -1,0 +1,195 @@
+Delivered-To: cpb86@g.cornell.edu
+Received: by 2002:a05:6a11:b997:b0:661:4334:f634 with SMTP id ma23csp2689799pxc;
+        Fri, 10 Oct 2025 11:47:14 -0700 (PDT)
+X-Forwarded-Encrypted: i=3; AJvYcCX0hKL7EUdTRSXcgfzc3RVMYW9bzWEjxJkR2u1QszSbPWyy4ubuNP9ae5tFU4Nqi6K3+obYVw==@g.cornell.edu
+X-Google-Smtp-Source: AGHT+IEm7y4xIvFntd2dlvorcjy9sF7PpAN+k0h671XMn7tQiAsdK9Do+zGyXM3lqwe2ctfWvfPC
+X-Received: by 2002:a05:6a20:3d1a:b0:318:b46f:ca8a with SMTP id adf61e73a8af0-32da84630a0mr17208182637.30.1760122033797;
+        Fri, 10 Oct 2025 11:47:13 -0700 (PDT)
+ARC-Seal: i=2; a=rsa-sha256; t=1760122033; cv=pass;
+        d=google.com; s=arc-20240605;
+        b=YWFj8PVvXe3f6N9A0RLtvxAof+QZ86f75bsr4nsV4uueEUhrC3d5V7viCg6VkwUFsV
+         AVAz2M84I/eTGKf6TTzOnfQPsQ3xE6hyMxKRNv5o0e7MIsJ/uW3H0aAJRouQzwrFAEzv
+         pTcziDCkPk6S7rSlsJcEl0iSM0s+d3vLx3oiXpI95almHDNt8W4iqvxGqa2yWm9qs26Z
+         iOozN5KMZw/RcGNQEnwrMXybqsiqgERDwwI2OqcGEpsqEHV2MYecq5PzDPd8/cRLEkrt
+         46EFrJhlzZmZypuN9l/D3aYi1DdMi+tas3ZDsskN2Arq7C9xIo/2YJ2VhVuG3Y/s60OP
+         66gQ==
+ARC-Message-Signature: i=2; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=mime-version:content-language:accept-language:in-reply-to
+         :references:message-id:date:thread-index:thread-topic:subject:to
+         :from:dkim-signature;
+        bh=dawcqXVJFnvq8P3qfjq7wIU7C5URbGOvEMvpNMHxO9k=;
+        fh=HsSiXfBfXEkq35VhRFJJkBoaBgfdkY2sydQxAKGFL/k=;
+        b=iuZIhiRE+BH90RLGVjQwiMR8z7LRvmNbuh0ArrYsHX7O4dSDVN6SJHaO+D8cWzLLR9
+         mMwwpLoyComAUbxyjBUdymexBp5B7BISco15uWv+RTdg9SrPkIaGJr3TzxdEKIOqJEp+
+         oQSHnpj6Tjp+mb/CGW7zr4+MAh6IP8fbpAWzfLwHlcMegCvRyeq+Kx0sXU0Mdn/KtP5V
+         0a5P/bal+2HLtOrTMYmc5AOaw+xi9T3/GDq19RCgo0o0LWxkAcTyeFVrUtK99R07SHJV
+         FDNc1ic3UVEG7B80W9RsXZpyw0aJcf1fL7iwbm+UgyXbpTcprnQUQqCSypKhVuKgK2fi
+         JObg==;
+        dara=google.com
+ARC-Authentication-Results: i=2; mx.google.com;
+       dkim=pass header.i=@cornell.edu header.s=selector2 header.b=KYeCfG5K;
+       arc=pass (i=1 spf=pass spfdomain=cornell.edu dkim=pass dkdomain=cornell.edu dmarc=pass fromdomain=cornell.edu);
+       gateway.spf=pass (google.com: domain g.cornell.edu configured 2a01:111:f403:c10e::3 as internal address) smtp.mailfrom=rfs247@cornell.edu smtp.remote-ip="2a01:111:f403:c10e::3" policy.d=g.cornell.edu
+Return-Path: <rfs247@cornell.edu>
+Received: from SN1PR07CU001.outbound.protection.outlook.com (mail-sn1pr07cu00103.outbound.protection.outlook.com. [2a01:111:f403:c10e::3])
+        by mx.google.com with ESMTPS id d2e1a72fcca58-7992b0660desi2418420b3a.26.2025.10.10.11.47.13
+        for <cpb86@g.cornell.edu>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 10 Oct 2025 11:47:13 -0700 (PDT)
+Received-SPF: pass (google.com: domain g.cornell.edu configured 2a01:111:f403:c10e::3 as internal address)
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@cornell.edu header.s=selector2 header.b=KYeCfG5K;
+       arc=pass (i=1 spf=pass spfdomain=cornell.edu dkim=pass dkdomain=cornell.edu dmarc=pass fromdomain=cornell.edu);
+       gateway.spf=pass (google.com: domain g.cornell.edu configured 2a01:111:f403:c10e::3 as internal address) smtp.mailfrom=rfs247@cornell.edu smtp.remote-ip="2a01:111:f403:c10e::3" policy.d=g.cornell.edu
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=Ieauu/CgWzrs6XvykDcCXaJ26kWSnROokekY7V7ij9O9GmxSzwg/eI5fVA6bOhEw/gGcAiHAoKXFBBrzmZHFz7tDaW0PjPABFnqx4QafAoVeekk1x7mbKw7kIc9xxtVJ3/rHtuEbEuY7vsmOGgMtRxRDYkISayubU/r5/NdKAGF7RrvJdKN/ik/L5rDGnnANC5kymAfkpROttGy2TM5GrZuDm4pyV8ei7o3hAv86qzbsBUSUwn/dooDEYzqcpguM+r20Irx0AVt0nwkcqcy6cBJgwsUUuJVLcr5OTcsb+ac68FX5VGnfVgJhk9kZs5j59zkV3hUpVzELdGanZgCwIw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=dawcqXVJFnvq8P3qfjq7wIU7C5URbGOvEMvpNMHxO9k=;
+ b=G3bxsNfYSc0LDmjOZs0X+B9Mmd3FjktxPICjf7IX9lfIMOqiAAiAXhjhcjKKVfE+NTbu1Soxo/oIu4Jz2DQS7QMLXPwLRR7cBVmfJ7np+/kg28UE/D079wMINx3M+QNdwKCMJqciyWaaRBcrQNEF+mUTHWI4xwOYO0MiJ/xYoJ0dDxPsXpP6kalLEI5OyICr2jFsh3keNnBUOA9uxrVSuYCrzbD/11bR9O+YKYqJAloGs2kNjPU4YXfcTcpyTOl1w5jJ1Ne/Y72PpcfGkDLNLAPVQ4fQPAqZG02PHhD7spbosBqhgzzY3uSBscZ8b0czzsQBRYan3TYgWaNO5xfguQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=cornell.edu; dmarc=pass action=none header.from=cornell.edu;
+ dkim=pass header.d=cornell.edu; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=cornell.edu;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=dawcqXVJFnvq8P3qfjq7wIU7C5URbGOvEMvpNMHxO9k=;
+ b=KYeCfG5KRFTk/q8FZ9Wr1tftNhi+sL29grfpaeCVj1ck6Kb0iHBGcqCcnRD5vsTkZHnXi9xWucdDnXRKzDNkttjcejJVD0BDlMYNHbJ88gHN22xWQNUlrHE/ze78SJ59WLaUQYT0aFzqHQrWe/vAHsKrYzgOc9BxbGqQEFp586Y=
+Received: from SN6PR04MB4078.namprd04.prod.outlook.com (2603:10b6:805:49::27)
+ by MN2PR04MB6720.namprd04.prod.outlook.com (2603:10b6:208:1e3::17) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9203.9; Fri, 10 Oct
+ 2025 18:47:11 +0000
+Received: from SN6PR04MB4078.namprd04.prod.outlook.com
+ ([fe80::893d:aa08:de23:ea70]) by SN6PR04MB4078.namprd04.prod.outlook.com
+ ([fe80::893d:aa08:de23:ea70%3]) with mapi id 15.20.9182.017; Fri, 10 Oct 2025
+ 18:47:11 +0000
+From: "Robert F. Shepherd" <rfs247@cornell.edu>
+To: Chris Peter Bauer <cpb86@cornell.edu>, Purnendu - <purnendu@cornell.edu>
+Subject: Fwd: mobile bot
+Thread-Topic: mobile bot
+Thread-Index: AQHcOgO/mDenNEbA5E+opKi6c3mQQrS7uIvM
+Date: Fri, 10 Oct 2025 18:47:10 +0000
+Message-ID: <D6817BD4-426A-4FC7-B460-A27E31D915F7@cornell.edu>
+References:
+ <PH0PR13MB5520D4D5A4E30E81340A2E96E6EFA@PH0PR13MB5520.namprd13.prod.outlook.com>
+In-Reply-To:
+ <PH0PR13MB5520D4D5A4E30E81340A2E96E6EFA@PH0PR13MB5520.namprd13.prod.outlook.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=cornell.edu;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: SN6PR04MB4078:EE_|MN2PR04MB6720:EE_
+x-ms-office365-filtering-correlation-id: f0e62a54-7e29-4787-62da-08de082d6bf4
+x-ld-processed: 5d7e4366-1b9b-45cf-8e79-b14b27df46e1,ExtFwd
+x-ms-exchange-atpmessageproperties: SA
+x-microsoft-antispam: BCL:0;ARA:13230040|366016|8096899003|41050700001;
+x-microsoft-antispam-message-info:
+ haxa9ZblKaP6UBmPipw2mYzE/Eph8sgB6HtglTLdEMvlDTHnycgFy4tVDENPOA6Zm/ezG5qnHOzmz+pAuUvkgDV7vflspyXHEjalGX2nHJEnxg2YWilWGseAtnztK6oWSuKyhfDtNx0q8MNI5uyuAVxeD9RhGkFX9eP9ra3vSkSrEvdM1+WSIW4W2/r+hqc1KiDOjLqWkNFq8s7PP8xpxr800JE5Mc9RmqFMoAfE/ZvSBN3aQH6lGsRLnuX1qbKow3mUdv6B2CFFMccN8Vi0jwK7e55tSTpqgeOsmhfTrYfb2BN8DRXs9QJ1l9s9IjndkDdoqmR1JqSSABfYg17oXRDVuTzM+RoGIayW7odyzUbRGqkKk46BFMNawLRQOhOL4f9skaZg1uqUNtEhWKqkJUq3wXaOt+lGOrA/ZVtdJ3BqLuilGD11BAoGsR00doLDslqGC4Hi64c8WZJduGtQZ+wFQoyisIJwucMNaMp+vEMmU253s6N3Bb36zZqWAuFT4NEzfBUBuifCmXcs2Kr50D6B0/0jtOunbPhBsqOkSQ3n1u0iT3+h15MvDRgfrCUAPzxrQJe6N8ZWM+RrxOMdp5AukK4UM1xZXjxrwt6XYOc+i/c/ZCsX8yMaVpehOaiLZ1r+VCTDJKvlL/DWt7ic9TvVJPaxZXXnLuC7rKA59HY3bzckrcnxmt4OwVATONdMAIGNPqFfrtrqt2gaSFcU7zlHe98pFcbDLojJs0i9rEU=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SN6PR04MB4078.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(8096899003)(41050700001);DIR:INT;
+Content-Type: multipart/alternative;
+	boundary="_000_D6817BD4426A4FC7B460A27E31D915F7cornelledu_"
+MIME-Version: 1.0
+X-MS-Exchange-ForwardingLoop:
+	cpb86@cornell.edu;5d7e4366-1b9b-45cf-8e79-b14b27df46e1
+X-OriginatorOrg: cornell.edu
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: SN6PR04MB4078.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: f0e62a54-7e29-4787-62da-08de082d6bf4
+X-MS-Exchange-CrossTenant-originalarrivaltime: 10 Oct 2025 18:47:11.0299
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 5d7e4366-1b9b-45cf-8e79-b14b27df46e1
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: iI+y/dl5Kd2JR4+K0UypZD17sLj/YJNuoGm8zkJxtVNuCn/Dv5Ov1lVMDPS6H04wSz03potcBdcB2+dMw0lbBg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR04MB6720
+X-MS-Exchange-CrossPremises-AuthAs: Internal
+X-MS-Exchange-CrossPremises-AuthMechanism: 04
+X-MS-Exchange-CrossPremises-AuthSource: SN6PR04MB4078.namprd04.prod.outlook.com
+X-MS-Exchange-CrossPremises-TransportTrafficType: Email
+X-MS-Exchange-CrossPremises-SCL: 1
+X-MS-Exchange-CrossPremises-messagesource: StoreDriver
+X-MS-Exchange-CrossPremises-BCC:
+X-MS-Exchange-CrossPremises-originalclientipaddress: 67.241.70.204
+X-MS-Exchange-CrossPremises-transporttraffictype: Email
+X-MS-Exchange-CrossPremises-autoforwarded: true
+X-MS-Exchange-CrossPremises-antispam-scancontext: DIR:Originating;SFV:NSPM;SKIP:0;
+X-MS-Exchange-CrossPremises-processed-by-journaling: Journal Agent
+X-MS-Exchange-CrossPremises-History: DeliveredAndForwarded: cpb86@cornell.edu
+X-MS-Exchange-CrossPremises-Recipient-P2-Type: To
+X-OrganizationHeadersPreserved: MN2PR04MB6720.namprd04.prod.outlook.com
+
+--_000_D6817BD4426A4FC7B460A27E31D915F7cornelledu_
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+
+DQpTZW50IGZyb20gbXkgaVBob25lDQoNCkJlZ2luIGZvcndhcmRlZCBtZXNzYWdlOg0KDQpGcm9t
+OiBKZWZmcmV5IExpcHRvbiA8amVmZi5saXB0b25AYmVya3NoaXJlZ3JleS5jb20+DQpEYXRlOiBP
+Y3RvYmVyIDEwLCAyMDI1IGF0IDEyOjM0OjQwIEVEVA0KVG86ICJSb2JlcnQgRi4gU2hlcGhlcmQi
+IDxyZnMyNDdAY29ybmVsbC5lZHU+DQpTdWJqZWN0OiBtb2JpbGUgYm90DQoNCu+7vw0KSGVyZSBp
+cyBhIHF1b3RlIG9uIHRoZSByb2JvdCINCg0KaXQgcHJvYmFibHkgaXMgZWFzaWVyIGlmIHRoZXkg
+dHJ5IHRvIGZpZ3VyZSBvdXQgaG93IHRvIHdpcGUgaXQuIGkgZ2F0aGVyZWQgdGhydSB0aGUgZ3Jh
+cGV2aW5lIGhlcmUgdGhhdCBpdCBpcyBzZXQgdXAgd2l0aCBhbiBzc2gga2V5DQoNCnNzaC1lZDI1
+NTE5IEFBQUFDM056YUMxbFpESTFOVEU1QUFBQUlEWDh0VHJMZVZ5c0VXZTZGVVRQc1lBUWdyNm9w
+ajhOcFAvcnZZaW9OVUVlIGZsZXhib3QgY2EgMA0KDQpwcm9iYWJseSBtb3JlIG9mIGEgaGVhZGFj
+aGUgZ2V0dGluZyB0aGF0IHRvIHdvcmsgdGhhbiBpdCBpcyB0byBmaWd1cmUgb3V0IGhvdyB0byBy
+ZXByb2dyYW0gaXQgYWxsDQoNCiINCg==
+
+--_000_D6817BD4426A4FC7B460A27E31D915F7cornelledu_
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: base64
+
+PGh0bWw+DQo8aGVhZD4NCjxtZXRhIGh0dHAtZXF1aXY9IkNvbnRlbnQtVHlwZSIgY29udGVudD0i
+dGV4dC9odG1sOyBjaGFyc2V0PXV0Zi04Ij4NCjwvaGVhZD4NCjxib2R5IGRpcj0iYXV0byI+DQo8
+YnIgaWQ9ImxpbmVCcmVha0F0QmVnaW5uaW5nT2ZTaWduYXR1cmUiPg0KPGRpdiBkaXI9Imx0ciI+
+U2VudCBmcm9tIG15IGlQaG9uZTwvZGl2Pg0KPGRpdiBkaXI9Imx0ciI+PGJyPg0KQmVnaW4gZm9y
+d2FyZGVkIG1lc3NhZ2U6PGJyPg0KPGJyPg0KPC9kaXY+DQo8YmxvY2txdW90ZSB0eXBlPSJjaXRl
+Ij4NCjxkaXYgZGlyPSJsdHIiPjxiPkZyb206PC9iPiBKZWZmcmV5IExpcHRvbiAmbHQ7amVmZi5s
+aXB0b25AYmVya3NoaXJlZ3JleS5jb20mZ3Q7PGJyPg0KPGI+RGF0ZTo8L2I+IE9jdG9iZXIgMTAs
+IDIwMjUgYXQgMTI6MzQ6NDAgRURUPGJyPg0KPGI+VG86PC9iPiAmcXVvdDtSb2JlcnQgRi4gU2hl
+cGhlcmQmcXVvdDsgJmx0O3JmczI0N0Bjb3JuZWxsLmVkdSZndDs8YnI+DQo8Yj5TdWJqZWN0Ojwv
+Yj4gPGI+bW9iaWxlIGJvdDwvYj48YnI+DQo8YnI+DQo8L2Rpdj4NCjwvYmxvY2txdW90ZT4NCjxi
+bG9ja3F1b3RlIHR5cGU9ImNpdGUiPg0KPGRpdiBkaXI9Imx0ciI+77u/DQo8ZGl2IHN0eWxlPSJ0
+ZXh0LWFsaWduOiBsZWZ0OyB0ZXh0LWluZGVudDogMHB4OyBmb250LWZhbWlseTogQXB0b3MsIEFw
+dG9zX0VtYmVkZGVkRm9udCwgQXB0b3NfTVNGb250U2VydmljZSwgQ2FsaWJyaSwgSGVsdmV0aWNh
+LCBzYW5zLXNlcmlmOyBmb250LXNpemU6IDEycHQ7IGNvbG9yOiByZ2IoMCwgMCwgMCk7IiBjbGFz
+cz0iZWxlbWVudFRvUHJvb2YiPg0KSGVyZSBpcyBhIHF1b3RlIG9uIHRoZSByb2JvdCZxdW90OyZu
+YnNwOzwvZGl2Pg0KPGRpdiBzdHlsZT0idGV4dC1hbGlnbjogbGVmdDsgdGV4dC1pbmRlbnQ6IDBw
+eDsgZm9udC1mYW1pbHk6IEFwdG9zLCBBcHRvc19FbWJlZGRlZEZvbnQsIEFwdG9zX01TRm9udFNl
+cnZpY2UsIENhbGlicmksIEhlbHZldGljYSwgc2Fucy1zZXJpZjsgZm9udC1zaXplOiAxMnB0OyBj
+b2xvcjogcmdiKDAsIDAsIDApOyIgY2xhc3M9ImVsZW1lbnRUb1Byb29mIj4NCjxicj4NCjwvZGl2
+Pg0KPGRpdiBzdHlsZT0idGV4dC1hbGlnbjogbGVmdDsgdGV4dC1pbmRlbnQ6IDBweDsgZm9udC1m
+YW1pbHk6IEFwdG9zLCBBcHRvc19FbWJlZGRlZEZvbnQsIEFwdG9zX01TRm9udFNlcnZpY2UsIENh
+bGlicmksIEhlbHZldGljYSwgc2Fucy1zZXJpZjsgZm9udC1zaXplOiAxMnB0OyBjb2xvcjogcmdi
+KDAsIDAsIDApOyIgY2xhc3M9ImVsZW1lbnRUb1Byb29mIj4NCml0IHByb2JhYmx5IGlzIGVhc2ll
+ciBpZiB0aGV5IHRyeSB0byBmaWd1cmUgb3V0IGhvdyB0byB3aXBlIGl0LiBpIGdhdGhlcmVkIHRo
+cnUgdGhlIGdyYXBldmluZSBoZXJlIHRoYXQgaXQgaXMgc2V0IHVwIHdpdGggYW4gc3NoIGtleTwv
+ZGl2Pg0KPHByZSBzdHlsZT0ibWFyZ2luOiA0cHggMHB4OyBwYWRkaW5nOiA4cHg7IGJvcmRlci13
+aWR0aDogMC42NjY2NjdweDsgYm9yZGVyLXN0eWxlOiBzb2xpZDsgYm9yZGVyLWNvbG9yOiByZ2Jh
+KDIzMiwgMjMyLCAyMzIsIDAuMTMpOyBib3JkZXItcmFkaXVzOiA0cHg7IiBjbGFzcz0iZWxlbWVu
+dFRvUHJvb2YiPjxkaXYgc3R5bGU9InRleHQtYWxpZ246IGxlZnQ7IHRleHQtaW5kZW50OiAwcHg7
+IGxpbmUtaGVpZ2h0OiAxLjUwMDAxOyB3aGl0ZS1zcGFjZTogcHJlLXdyYXA7IGZvbnQtZmFtaWx5
+OiBBcHRvcywgQXB0b3NfRW1iZWRkZWRGb250LCBBcHRvc19NU0ZvbnRTZXJ2aWNlLCBDYWxpYnJp
+LCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWY7IGZvbnQtc2l6ZTogMTJwdDsgY29sb3I6IHJnYigwLCAw
+LCAwKTsiIGNsYXNzPSJlbGVtZW50VG9Qcm9vZiI+c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJ
+MU5URTVBQUFBSURYOHRUckxlVnlzRVdlNkZVVFBzWUFRZ3I2b3BqOE5wUC9ydllpb05VRWUgZmxl
+eGJvdCBjYSAwPC9kaXY+PC9wcmU+DQo8ZGl2IHN0eWxlPSJ0ZXh0LWFsaWduOiBsZWZ0OyB0ZXh0
+LWluZGVudDogMHB4OyBmb250LWZhbWlseTogQXB0b3MsIEFwdG9zX0VtYmVkZGVkRm9udCwgQXB0
+b3NfTVNGb250U2VydmljZSwgQ2FsaWJyaSwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmOyBmb250LXNp
+emU6IDEycHQ7IGNvbG9yOiByZ2IoMCwgMCwgMCk7IiBjbGFzcz0iZWxlbWVudFRvUHJvb2YiPg0K
+cHJvYmFibHkgbW9yZSBvZiBhIGhlYWRhY2hlIGdldHRpbmcgdGhhdCB0byB3b3JrIHRoYW4gaXQg
+aXMgdG8gZmlndXJlIG91dCBob3cgdG8gcmVwcm9ncmFtIGl0IGFsbDwvZGl2Pg0KPGRpdiBzdHls
+ZT0iZm9udC1mYW1pbHk6IEFwdG9zLCBBcHRvc19FbWJlZGRlZEZvbnQsIEFwdG9zX01TRm9udFNl
+cnZpY2UsIENhbGlicmksIEhlbHZldGljYSwgc2Fucy1zZXJpZjsgZm9udC1zaXplOiAxMnB0OyBj
+b2xvcjogcmdiKDAsIDAsIDApOyIgY2xhc3M9ImVsZW1lbnRUb1Byb29mIj4NCjxicj4NCjwvZGl2
+Pg0KPGRpdiBzdHlsZT0iZm9udC1mYW1pbHk6IEFwdG9zLCBBcHRvc19FbWJlZGRlZEZvbnQsIEFw
+dG9zX01TRm9udFNlcnZpY2UsIENhbGlicmksIEhlbHZldGljYSwgc2Fucy1zZXJpZjsgZm9udC1z
+aXplOiAxMnB0OyBjb2xvcjogcmdiKDAsIDAsIDApOyIgY2xhc3M9ImVsZW1lbnRUb1Byb29mIj4N
+CiZxdW90OzwvZGl2Pg0KPC9kaXY+DQo8L2Jsb2NrcXVvdGU+DQo8L2JvZHk+DQo8L2h0bWw+DQo=
+
+--_000_D6817BD4426A4FC7B460A27E31D915F7cornelledu_--

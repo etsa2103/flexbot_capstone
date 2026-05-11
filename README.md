@@ -7,6 +7,7 @@ Berkshire Grey dropped off 30 differential drive industrial robots known as Flex
   <img src="imgs/angledView.jpeg" width="300">
   <img src="imgs/sideView.jpeg" width="300">
 </p>
+
 ---
 
 ## Hardware
@@ -30,8 +31,11 @@ The rotary stage was originally included to allow the top section of the robot t
 ## Electrical Connections
 
 The diagram below shows the overall electrical layout of the robot and how the different PCBs connect to each other. Rather than labeling every individual wire within each cable, the diagram focuses on the main connectors and subsystem relationships to keep the system architecture easier to understand.
-![circuit-diagram](imgs/flexbot-circuit-diagram.png)
-**Figure 1: Circuit Diagram of Flexbot’s Internal Electronics**
+<p align="center">
+  <img src="imgs/flexbot-circuit-diagram.png" width="1200">
+  <br>
+  <font size="5"><b>Figure 1: Circuit Diagram of Flexbot’s Internal Electronics</b></font>
+</p>
 
 ---
 
@@ -47,25 +51,39 @@ All code developed for the low level computer onboard the flexbot can be found i
 
 ## Modifications
 
-I made several hardware modifications to repurpose the FlexBot for standard research applications. First, to overcome restrictions imposed by the proprietary safety board, I disconnected it and manually rerouted 24V to each of the Safety Torque Off (STO) pins on the MCBs. This 24 volts was taken from the PDB and routed through both Emergency Stop (E-stop) buttons to ensure the robot remained safe to operate.
+To repurpose the FlexBot for standard research applications, I made several hardware modifications to remove proprietary dependencies and support external hardware integration.
 
-Next, I worked with Jaimes Romero to remove the original rotary stage mechanism and replace it with a custom-fabricated top plate, providing a stable and flat mounting surface for external hardware. We also designed and 3D-printed custom mounts for a VLP-16 LIDAR and an external high-level computer. We tapped into the robot's Power Distribution Board (PDB) to route the appropriate voltage to the new top plate. The full hardware breakdown is summarized in the figure below and the modified hardware is documented in the Hardware Miro Board.
-![modified-hardware-breakdown](imgs/modified-hardware-breakdown.png)
-**Figure 2: Hardware Breakdown of Modified Flexbot**
+First, to bypass restrictions imposed by the proprietary safety board, I disconnected the board and manually rerouted 24V power to each of the Safety Torque Off (STO) pins on the Motor Control Boards (MCBs). This 24V supply was sourced from the Power Distribution Board (PDB) and routed through both Emergency Stop (E-stop) buttons, preserving a functional hardware safety mechanism during operation.
 
-Finally, the original system relied on Berkshire Grey charging docks, which we had no access to. Instead of creating our own charging docks, for safety, I ordered a charger so the batteries could be recharged.
+Next, I collaborated with Jaimes Romero to remove the original rotary stage and replace it with a custom-fabricated top plate, creating a stable and flat mounting surface for new hardware. We also designed and 3D-printed custom mounts for a VLP-16 LIDAR, external high-level computer, and power distribution components. The CAD files for these mounts can be found [here](CAD). To power the new components, we tapped directly into the robot’s PDB and routed the required voltages to the top plate assembly.
+
+The resulting hardware architecture is summarized in the figure below, while additional documentation can be found in the modified hardware Miro board.
+
+<p align="center">
+  <img src="imgs/modified-hardware-breakdown.png" width="600">
+  <br>
+  <font size="5"><b>Figure 2: Hardware Breakdown of Modified FlexBot</b></font>
+</p>
+
+Finally, because the original system relied on proprietary Berkshire Grey charging docks that were unavailable to us, I sourced an external charger to safely recharge the batteries rather than developing a custom charging dock.
 
 ---
 
 ## ROS Integration
 
 To integrate the FlexBot into ROS 2, I established a dedicated Ethernet connection between the robot's low-level embedded computer and the new external high-level CPU. The low-level system processes raw hardware telemetry and continuously streams it as UDP packets to the high-level computer. There, custom ROS 2 nodes capture this UDP data and publish it to standard ROS topics. This architecture powers a teleoperation package that translates manual inputs into safe motor commands while simultaneously calculating precise wheel odometry. By combining this odometry with data from the integrated VLP-16 LiDAR, the system successfully runs a 2D SLAM pipeline to generate real-time maps of its environment. The full software breakdown is summarized in the figure below.
-![software-breakdown](imgs/software-breakdown.png)
-**Figure 3: Software Breakdown of Modified Flexbot**
+<p align="center">
+  <img src="imgs/software-breakdown.png" width="600">
+  <br>
+  <font size="5"><b>Figure 3: Software Breakdown of Modified Flexbot</b></font>
+</p>
 
 Finally, all operational data, including the live map, sensor feeds, and hardware status, is streamed to a custom Foxglove Studio dashboard for comprehensive, real-time monitoring as shown below.
-![foxglove](imgs/foxglove.png)
-**Figure 4: Foxglove**
+<p align="center">
+  <img src="imgs/foxglove.png" width="1200">
+  <br>
+  <font size="5"><b>Figure 4: Foxglove Visualizer</b></font>
+</p>
 
 All code developed for the high level computer can be found in this branch of the project Github. It also contains a clear README with everything you should need to replicate this setup on your own.
 
@@ -73,24 +91,19 @@ All code developed for the high level computer can be found in this branch of th
 
 ## Side Notes and Next Steps
 
-There are several remaining limitations and future improvements for the FlexBot platform. When charging the robot, it is important to ensure that the main power switch remains on, as the batteries will not charge otherwise. While the mobile base and LiDAR are fully operational, the scissor lift stage, LEDs, LCD display, PGV, and time of flight sensors are currently not fully integrated. The `low_level_cpu` branch has some scripts that attempt to access these parts of the hardware, but this control has not yet been exposed by a ROS node running on the high level cpu. Moving forward, the next major development goal is integrating a 3D SLAM pipeline to take advantage of the full capabilities of the mounted VLP-16 LiDAR. After reliable 3D mapping is achieved, future work will focus on implementing obstacle avoidance and autonomous exploration or mapping behaviors, allowing the FlexBot to operate with greater autonomy in research environments.
+There are several remaining limitations and future improvements for the FlexBot platform. When charging the robot, it is important to ensure that the main power switch remains on, as the batteries will not charge otherwise. While the mobile base and LiDAR are fully operational, the scissor lift stage, LEDs, LCD display, PGV, and time of flight sensors are currently not fully integrated. The `low_level_cpu` branch has some scripts that attempt to access these parts of the hardware, but this control has not yet been exposed by a ROS node running on the high level cpu. Moving forward, the next major development goal is integrating a 3D SLAM pipeline to take advantage of the full capabilities of the mounted VLP-16 LiDAR. After reliable 3D mapping is achieved, future work will focus on implementing obstacle avoidance and autonomous exploration or mapping behaviors, allowing the FlexBot to operate with greater autonomy in research environments. Lastly, any additional documentation I collected along the way can be found in [this folder](additional_docs) of the repo.
 
 ---
 
+## Acknowledgment
+
+**Advisors:** I would like to thank Fernando Cladera and Dr. M. Ani Hsieh for their consistent advice and support throughout this project.
+
+**Technical Contributors:** I would like to recognize Jaime Romero for all his CAD designs and his help during the debugging process. I would also like to recognize Kartik Virmani for much of the code he provided in this repo.
+
+**Cornell University:** Thanks to Chris Bauer for providing the documentation and insights from his work on the robot during the previous semester.
+
 ## Appendix
-
-### Previous Documentation
-
-- BG Flexbot manual  
-  https://cornell.box.com/s/qmkmx8giolcgj92opy3ygfzgm6xuyje4
-
-- Cornell Box  
-  https://app.box.com/folder/348944125989?s=29tjvikns65o8l0exeabmyehw10j4b1x
-
-### Penn Documentation
-
-- My Github  
-  https://github.com/etsa2103/flexbot_capstone
 
 - Kartik’s Github  
   https://github.com/virmani11kartik/bg_bot
@@ -103,8 +116,6 @@ There are several remaining limitations and future improvements for the FlexBot 
 
 - Circuit diagram  
   https://www.circuitlab.com/circuit/pdmw4kpy644g/flexbot-circuit-diagram/
-
-### Communication Channels
 
 - Slack  
   https://app.slack.com/client/T09S1APBSHY/D09S4T6TL04
