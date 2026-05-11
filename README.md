@@ -41,23 +41,23 @@ The diagram below shows the overall electrical layout of the robot and how the d
 
 ## Software Analysis
 
-To gain control over the FlexBot's internal systems, I began by establishing direct serial communication with the onboard CPU. This connection allowed me to monitor the boot sequence and understand the base operating system environment. I found that the CPU automatically tried connecting to a WiFi network called `bg-flexbot-wifi6`, so I spoofed the expected network to grant me full SSH access to the internal filesystem.
+To gain control over the FlexBot's internal systems, I began by establishing direct serial communication with the onboard CPU. This connection allowed me to monitor the boot sequence and understand the base operating system environment. I found that the CPU automatically tried connecting to a WiFi network called `bg-flexbot-wifi6`, so I spoofed the expected network to gain SSH access to the internal filesystem.
 
-With access secured, gaining control of the motors required reverse engineering the internal CAN network which I did with the help of Kartik Virmani of MOD lab. By using the robot's built-in maintenance program to send known movement commands, we monitored the resulting CAN traffic. By matching the data packets to specific inputs, we mapped out the CAN IDs for motor velocities and sensor data, ultimately allowing us to write custom control scripts that bypassed the original software entirely.
+Next, gaining control of the motors required reverse engineering the internal CAN network which I did with the help of Kartik Virmani of [MOD lab](https://www.modlabupenn.org/). By using the robot's built-in maintenance program to send known movement commands, we monitored the resulting CAN traffic. By matching the data packets to specific inputs, we mapped out the CAN IDs for motor velocities and sensor data, ultimately allowing us to write custom control scripts that bypassed the original software entirely.
 
-All code developed for the low level computer onboard the flexbot can be found in this branch of the project Github. It also contains a clear README with everything you should need to replicate this setup on your own.
+All code developed for the low level computer onboard the Flexbot can be found in [this branch](https://github.com/etsa2103/flexbot_capstone/tree/low_level_cpu) of the project Github. It also contains a clear README with everything you should need to replicate this setup on your own.
 
 ---
 
 ## Modifications
 
-To repurpose the FlexBot for standard research applications, I made several hardware modifications to remove proprietary dependencies and support external hardware integration.
+To repurpose the FlexBot for standard research applications, I made several hardware modifications to support external hardware integration.
 
 First, to bypass restrictions imposed by the proprietary safety board, I disconnected the board and manually rerouted 24V power to each of the Safety Torque Off (STO) pins on the Motor Control Boards (MCBs). This 24V supply was sourced from the Power Distribution Board (PDB) and routed through both Emergency Stop (E-stop) buttons, preserving a functional hardware safety mechanism during operation.
 
 Next, I collaborated with Jaimes Romero to remove the original rotary stage and replace it with a custom-fabricated top plate, creating a stable and flat mounting surface for new hardware. We also designed and 3D-printed custom mounts for a VLP-16 LIDAR, external high-level computer, and power distribution components. The CAD files for these mounts can be found [here](CAD). To power the new components, we tapped directly into the robot’s PDB and routed the required voltages to the top plate assembly.
 
-The resulting hardware architecture is summarized in the figure below, while additional documentation can be found in the modified hardware Miro board.
+The resulting hardware architecture is summarized in the figure below, while additional documentation can be found in the modified hardware section of the [Miro Board](https://miro.com/app/board/uXjVJ2xI5w8=/).
 
 <p align="center">
   <img src="imgs/modified-hardware-breakdown.png" width="600">
@@ -85,7 +85,7 @@ Finally, all operational data, including the live map, sensor feeds, and hardwar
   <font size="5"><b>Figure 4: Foxglove Visualizer</b></font>
 </p>
 
-All code developed for the high level computer can be found in this branch of the project Github. It also contains a clear README with everything you should need to replicate this setup on your own.
+All code developed for the high level computer can be found in [this branch](https://github.com/etsa2103/flexbot_capstone/tree/high_level_cpu) of the project Github. It also contains a clear README with everything you should need to replicate this setup on your own.
 
 ---
 
